@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Presentation Analyzer</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; padding: 20px; }
+        .container { background: white; border-radius: 20px; padding: 50px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center; max-width: 600px; }
+        h1 { color: #1f2937; margin-bottom: 15px; font-size: 2.5em; }
+        p { color: #6b7280; margin-bottom: 30px; font-size: 1.1em; line-height: 1.6; }
+        .features { text-align: left; margin: 30px 0; padding: 20px; background: #f9fafb; border-radius: 10px; }
+        .features h3 { color: #1f2937; margin-bottom: 15px; }
+        .features ul { list-style: none; padding: 0; }
+        .features li { padding: 8px 0; color: #374151; }
+        .features li:before { content: '✅ '; margin-right: 8px; }
+        a { display: inline-block; padding: 18px 40px; margin: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 1.1em; transition: transform 0.3s; }
+        a:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 Presentation Analyzer</h1>
+        <p>AI-Powered Video Recording with Real-Time Issue Detection & Timestamping</p>
+        
+        <div class="features">
+            <h3>Features:</h3>
+            <ul>
+                <li>Record presentation video with audio</li>
+                <li>Real-time AI analysis with Gemini</li>
+                <li>Automatic issue detection with timestamps</li>
+                <li>Severity-based categorization (Critical/High/Medium/Low)</li>
+                <li>Download video and detailed JSON report</li>
+                <li>Track text clarity, visual design, and content quality</li>
+            </ul>
+        </div>
+        
+        <a href="/recorder">🎬 Start Recording Now</a>
+    </div>
+</body>
+</html>

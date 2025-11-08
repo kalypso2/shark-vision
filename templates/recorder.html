@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Video Presentation Recorder</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 20px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 5px; }
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .video-section { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        #videoPreview { width: 100%; border-radius: 10px; background: #000; max-height: 500px; }
+        .controls { margin-top: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        button { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #startBtn { background: #10b981; color: white; }
+        #stopBtn { background: #ef4444; color: white; }
+        #downloadBtn { background: #3b82f6; color: white; }
+        .timer { font-size: 24px; font-weight: bold; color: #1f2937; padding: 10px 20px; background: #f3f4f6; border-radius: 8px; }
+        .timer.recording { color: #ef4444; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .stat-card { background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-card .label { font-size: 12px; color: #6b7280; margin-bottom: 5px; }
+        .stat-card .value { font-size: 20px; font-weight: bold; color: #1f2937; }
+        .issues-panel { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 650px; overflow-y: auto; }
+        .issues-panel h2 { margin-bottom: 15px; color: #1f2937; font-size: 1.5em; }
+        .issue-item { background: #fff; border-left: 4px solid #ef4444; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .issue-item.critical { border-left-color: #dc2626; background: #fee2e2; }
+        .issue-item.high { border-left-color: #f59e0b; background: #fef3c7; }
+        .issue-item.medium { border-left-color: #3b82f6; background: #dbeafe; }
+        .issue-item.low { border-left-color: #10b981; background: #d1fae5; }
+        .issue-timestamp { font-weight: bold; color: #3b82f6; font-size: 14px; display: inline-block; margin-bottom: 5px; }
+        .issue-category { display: inline-block; padding: 3px 8px; background: #667eea; color: white; border-radius: 4px; font-size: 11px; margin-left: 8px; }
+        .issue-text { font-size: 14px; color: #1f2937; margin: 5px 0; font-weight: 600; }
+        .issue-suggestion { font-size: 13px; color: #6b7280; margin-top: 5px; padding-left: 10px; border-left: 2px solid #d1d5db; }
+        .empty-state { text-align: center; padding: 40px; color: #9ca3af; }
+        .severity-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-left: 5px; }
+        .severity-badge.critical { background: #dc2626; color: white; }
+        .severity-badge.high { background: #f59e0b; color: white; }
+        .severity-badge.medium { background: #3b82f6; color: white; }
+        .severity-badge.low { background: #10b981; color: white; }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+        .status-badge.ready { background: #d1d5db; color: #1f2937; }
+        .status-badge.recording { background: #ef4444; color: white; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        
+        /* Report Section Styles */
+        .report-summary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: center; }
+        .report-summary h3 { margin-bottom: 15px; font-size: 1.5em; }
+        .report-summary .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 15px; }
+        .report-summary .stat { padding: 10px; background: rgba(255,255,255,0.2); border-radius: 8px; }
+        .report-summary .stat-value { font-size: 1.8em; font-weight: bold; }
+        .report-summary .stat-label { font-size: 0.9em; opacity: 0.9; }
+        .report-issues { margin-top: 25px; }
+        .report-issues h3 { color: #1f2937; margin-bottom: 20px; }
+        .report-issue-item { background: #f9fafb; border-left: 4px solid #ef4444; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        .report-issue-item.critical { border-left-color: #dc2626; }
+        .report-issue-item.high { border-left-color: #f59e0b; }
+        .report-issue-item.medium { border-left-color: #3b82f6; }
+        .report-issue-item.low { border-left-color: #10b981; }
+        .report-timestamp { font-weight: bold; color: #3b82f6; margin-bottom: 8px; }
+        .report-category { display: inline-block; background: #667eea; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 10px; }
+        .report-severity { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .report-severity.critical { background: #dc2626; color: white; }
+        .report-severity.high { background: #f59e0b; color: white; }
+        .report-severity.medium { background: #3b82f6; color: white; }
+        .report-severity.low { background: #10b981; color: white; }
+        .report-issue-text { font-weight: 600; color: #1f2937; margin: 10px 0; }
+        .report-suggestion { color: #6b7280; padding-left: 15px; border-left: 3px solid #d1d5db; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Presentation Video Recorder</h1>
+            <p>Record your presentation with AI-powered issue detection & timestamps</p>
+            <span id="statusBadge" class="status-badge ready">Ready</span>
+        </div>
+        
+        <div class="main-grid">
+            <div class="video-section">
+                <video id="videoPreview" autoplay muted playsinline></video>
+                
+                <div class="controls">
+                    <button id="startBtn">🔴 Start Recording</button>
+                    <button id="stopBtn" disabled>⏹️ Stop Recording</button>
+                    <button id="reportBtn" disabled>� Generate Report</button>
+                    <div class="timer" id="timer">00:00</div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="label">Frames Analyzed</div>
+                        <div class="value" id="frameCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Issues Detected</div>
+                        <div class="value" id="issueCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Avg Score</div>
+                        <div class="value" id="avgScore">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="issues-panel">
+                <h2>🚨 Issues Detected (Timestamped)</h2>
+                <div id="issuesList">
+                    <div class="empty-state">
+                        <p>No issues detected yet</p>
+                        <p style="font-size: 12px; margin-top: 5px;">Start recording to analyze your presentation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Report Section -->
+        <div id="reportSection" style="display: none; margin-top: 30px;">
+            <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                <h2 style="color: #1f2937; margin-bottom: 20px; text-align: center;">📋 Final Presentation Report</h2>
+                <div id="reportContent"></div>
+            </div>
+        </div>
+    </div>
+    
+    <canvas id="captureCanvas" style="display:none;"></canvas>
+    
+    <script>
+        const videoPreview = document.getElementById('videoPreview');
+        const canvas = document.getElementById('captureCanvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const reportBtn = document.getElementById('reportBtn');
+        const timerEl = document.getElementById('timer');
+        const statusBadge = document.getElementById('statusBadge');
+        const issuesList = document.getElementById('issuesList');
+        const frameCountEl = document.getElementById('frameCount');
+        const issueCountEl = document.getElementById('issueCount');
+        const avgScoreEl = document.getElementById('avgScore');
+        
+        let mediaStream = null;
+        let isRecording = false;
+        let sessionId = null;
+        let startTime = null;
+        let timerInterval = null;
+        let captureInterval = null;
+        let frameCount = 0;
+        let issueCount = 0;
+        let totalScore = 0;
+        let scoreCount = 0;
+        let allIssues = [];
+        
+        async function initWebcam() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 1280, height: 720 }
+                });
+                videoPreview.srcObject = mediaStream;
+                console.log('✅ Webcam initialized');
+            } catch (err) {
+                console.error('❌ Webcam error:', err);
+                alert('Could not access webcam/microphone: ' + err.message);
+            }
+        }
+        
+        startBtn.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/start-recording', { method: 'POST' });
+                const data = await res.json();
+                
+                if (!data.success) {
+                    alert('Failed to start session');
+                    return;
+                }
+                
+                sessionId = data.session_id;
+                isRecording = true;
+                startTime = Date.now();
+                frameCount = 0;
+                issueCount = 0;
+                totalScore = 0;
+                scoreCount = 0;
+                allIssues = [];
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                reportBtn.disabled = true;
+                statusBadge.textContent = '🔴 Analyzing';
+                statusBadge.className = 'status-badge recording';
+                timerEl.className = 'timer recording';
+                issuesList.innerHTML = '<div class="empty-state"><p>Analyzing...</p></div>';
+                document.getElementById('reportSection').style.display = 'none';
+                timerInterval = setInterval(updateTimer, 1000);
+                captureInterval = setInterval(captureAndAnalyze, 3000);
+                
+                console.log('✅ Recording started');
+            } catch (err) {
+                console.error('❌ Start error:', err);
+                alert('Failed to start recording: ' + err.message);
+            }
+        });
+        
+        stopBtn.addEventListener('click', async () => {
+            try {
+                isRecording = false;
+                clearInterval(timerInterval);
+                clearInterval(captureInterval);
+                
+                const duration = (Date.now() - startTime) / 1000;
+                const res = await fetch('/stop-recording', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId, duration })
+                });
+                
+                const data = await res.json();
+                
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                reportBtn.disabled = false;
+                statusBadge.textContent = 'Stopped - Generate Report';
+                statusBadge.className = 'status-badge ready';
+                timerEl.className = 'timer';
+                
+                console.log('✅ Analysis stopped');
+            } catch (err) {
+                console.error('❌ Stop error:', err);
+                alert('Error stopping recording: ' + err.message);
+            }
+        });
+        
+        reportBtn.addEventListener('click', generateReport);
+        
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const mins = Math.floor(elapsed / 60);
+            const secs = elapsed % 60;
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        async function captureAndAnalyze() {
+            if (!isRecording) return;
+            
+            try {
+                canvas.width = videoPreview.videoWidth;
+                canvas.height = videoPreview.videoHeight;
+                ctx.drawImage(videoPreview, 0, 0);
+                const frameData = canvas.toDataURL('image/jpeg', 0.85);
+                const timestamp = (Date.now() - startTime) / 1000;
+                
+                const res = await fetch('/capture-frame', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        frame: frameData,
+                        timestamp: timestamp
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    frameCount = data.frame_number;
+                    frameCountEl.textContent = frameCount;
+                    
+                    if (data.overall_score) {
+                        totalScore += data.overall_score;
+                        scoreCount++;
+                        avgScoreEl.textContent = (totalScore / scoreCount).toFixed(1);
+                    }
+                    
+                    if (data.new_issues && data.new_issues.length > 0) {
+                        if (issueCount === 0) {
+                            issuesList.innerHTML = '';
+                        }
+                        
+                        data.new_issues.forEach(issue => {
+                            issueCount++;
+                            issueCountEl.textContent = issueCount;
+                            allIssues.push(issue);
+                            displayIssue(issue);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('❌ Capture error:', err);
+            }
+        }
+        
+        function displayIssue(issue) {
+            const issueEl = document.createElement('div');
+            issueEl.className = `issue-item ${issue.severity}`;
+            issueEl.innerHTML = `
+                <div>
+                    <span class="issue-timestamp">⏱️ ${issue.timestamp_formatted}</span>
+                    <span class="issue-category">${issue.category}</span>
+                    <span class="severity-badge ${issue.severity}">${issue.severity}</span>
+                </div>
+                <div class="issue-text">${issue.issue}</div>
+                <div class="issue-suggestion">💡 ${issue.suggestion}</div>
+            `;
+            issuesList.insertBefore(issueEl, issuesList.firstChild);
+        }
+        
+        function generateReport() {
+            const reportSection = document.getElementById('reportSection');
+            const reportContent = document.getElementById('reportContent');
+            
+            // Calculate duration
+            const duration = (Date.now() - startTime) / 1000;
+            const durationFormatted = `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}`;
+            
+            // Count issues by severity
+            const severityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+            allIssues.forEach(issue => {
+                severityCounts[issue.severity] = (severityCounts[issue.severity] || 0) + 1;
+            });
+            
+            // Generate summary
+            let overallAssessment = 'Good presentation!';
+            const avgScore = scoreCount > 0 ? (totalScore / scoreCount) : 0;
+            
+            if (avgScore < 4) {
+                overallAssessment = 'Needs significant improvement - multiple critical issues detected.';
+            } else if (avgScore < 6) {
+                overallAssessment = 'Room for improvement - several issues need attention.';
+            } else if (avgScore < 8) {
+                overallAssessment = 'Good presentation with some minor improvements needed.';
+            } else {
+                overallAssessment = 'Excellent presentation! Minimal issues detected.';
+            }
+            
+            // Create report HTML
+            let reportHTML = `
+                <div class="report-summary">
+                    <h3>📊 Presentation Analysis Summary</h3>
+                    <p style="font-size: 1.1em; margin-bottom: 15px;">${overallAssessment}</p>
+                    <div class="stats-row">
+                        <div class="stat">
+                            <div class="stat-value">${durationFormatted}</div>
+                            <div class="stat-label">Duration</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${frameCount}</div>
+                            <div class="stat-label">Frames Analyzed</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${allIssues.length}</div>
+                            <div class="stat-label">Issues Found</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${avgScore.toFixed(1)}/10</div>
+                            <div class="stat-label">Avg Score</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (allIssues.length > 0) {
+                reportHTML += `
+                    <div class="report-issues">
+                        <h3>🚨 Issues Detected (${allIssues.length} total)</h3>
+                        <div style="margin-bottom: 20px;">
+                            <span style="margin-right: 15px;">🔴 Critical: ${severityCounts.critical}</span>
+                            <span style="margin-right: 15px;">🟠 High: ${severityCounts.high}</span>
+                            <span style="margin-right: 15px;">🔵 Medium: ${severityCounts.medium}</span>
+                            <span>🟢 Low: ${severityCounts.low}</span>
+                        </div>
+                `;
+                
+                // Sort issues by timestamp
+                const sortedIssues = [...allIssues].sort((a, b) => a.timestamp - b.timestamp);
+                
+                sortedIssues.forEach(issue => {
+                    reportHTML += `
+                        <div class="report-issue-item ${issue.severity}">
+                            <div class="report-timestamp">⏱️ ${issue.timestamp_formatted}</div>
+                            <div style="margin-bottom: 8px;">
+                                <span class="report-category">${issue.category}</span>
+                                <span class="report-severity ${issue.severity}">${issue.severity}</span>
+                            </div>
+                            <div class="report-issue-text">${issue.issue}</div>
+                            <div class="report-suggestion">💡 ${issue.suggestion}</div>
+                        </div>
+                    `;
+                });
+                
+                reportHTML += '</div>';
+            } else {
+                reportHTML += `
+                    <div style="text-align: center; padding: 40px; color: #10b981;">
+                        <h3>🎉 No Issues Detected!</h3>
+                        <p>Your presentation appears to be well-structured and clear.</p>
+                    </div>
+                `;
+            }
+            
+            reportContent.innerHTML = reportHTML;
+            reportSection.style.display = 'block';
+            
+            // Scroll to report
+            reportSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        initWebcam();
+    </script>
+</body>
+</html>

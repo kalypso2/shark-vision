@@ -1,0 +1,11 @@
+flask==3.0.0flask==3.0.0
+
+google-generativeai==0.8.3python-dotenv==1.0.0
+
+python-dotenv==1.0.0google-generativeai==0.3.1
+
+pillow==10.4.0pillow==10.1.0
+python-pptx==0.6.23
+pdf2image==1.16.3
+opencv-python==4.8.1.78
+werkzeug==3.0.1
