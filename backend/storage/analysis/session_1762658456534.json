@@ -1,0 +1,28 @@
+{
+  "session_id": "session_1762658456534",
+  "analysis": {
+    "session_id": "session_1762658456534",
+    "session_meta": {
+      "duration_seconds": 40.211919,
+      "total_frames": 275,
+      "fps": 10,
+      "landmarks_per_frame": 543,
+      "total_landmarks_processed": 0
+    },
+    "aggregates": {
+      "posture_score": 0,
+      "eye_contact_proxy": 0,
+      "gesture_quality": 0,
+      "gesture_frequency": 0,
+      "engagement_score": 0,
+      "smile_score": 0
+    },
+    "timeline": [],
+    "debug": {
+      "metrics_count": 0,
+      "events_count": 0
+    },
+    "video_path": "/Users/samebaugh/shark-vision/backend/storage/session_1762658456534.mp4"
+  },
+  "coaching": "**Analysis Complete**\n\nYour presentation has been analyzed with 543 landmarks per frame.\n\n**Scores:**\n- Posture: 0/100\n- Eye Contact: 0/100\n- Gesture Quality: 0/100\n- Engagement: 0/100\n\nTo receive AI-powered coaching feedback, please set your GEMINI_API_KEY environment variable.\n"
+}

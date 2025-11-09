@@ -1,0 +1,51 @@
+# Cursor AI Rules for Shark Vision Project
+
+## Documentation Policy
+- NEVER proactively create documentation files (*.md) or README files after changes
+- Only create or update documentation when explicitly requested by the user
+- Do not create summary documents, change logs, or update notes unless asked
+
+## Code Reuse Policy
+- ALWAYS search for and reuse existing components, utilities, and code before creating new ones
+- Check the codebase thoroughly using codebase_search or grep before implementing new functionality
+- If similar functionality exists, extend or modify it rather than duplicating
+- Prefer refactoring existing code over creating parallel implementations
+- When a component already exists that can be adapted, modify it instead of creating a new one
+
+## Development Preferences
+- Prioritize editing existing files over creating new files
+- Use the component structure already established in the project
+- Follow existing patterns and conventions found in the codebase
+- Keep the codebase DRY (Don't Repeat Yourself)
+
+## File Organization
+- Place new components in `/components` directory only if they don't already exist
+- Check for existing utilities before creating new helper functions
+- Consolidate related functionality into existing modules when possible
+
+## Body Language Analysis Module
+- Core logic in `lib/body_language/` - do not duplicate
+- Event detection thresholds in `metrics.ts` - single source of truth
+- Video recording handled by `lib/video_recorder.ts` - reuse this class
+- Storage operations in `lib/storage.ts` - use these functions
+
+## TypeScript Standards
+- Use strict typing throughout
+- Import types from `lib/body_language/types.ts`
+- Avoid `any` types - use proper interfaces
+- Client components must have 'use client' directive
+
+## Performance Considerations
+- TensorFlow.js processing is expensive - maintain 10 FPS target
+- Video files can be large - use appropriate bitrates
+- Browser memory management - dispose of unused resources
+
+## Future Integration Points
+- Audio analysis: `lib/audio_analyzer.ts` (not yet implemented)
+- Slide detection: `lib/slide_detector.ts` (not yet implemented)
+- LLM coaching: `app/api/coaching/route.ts` (not yet implemented)
+
+## Communication
+- Focus responses on code changes and technical implementation
+- Skip verbose explanations about what was changed unless specifically asked
+- Do not create change summaries or documentation after completing tasks
