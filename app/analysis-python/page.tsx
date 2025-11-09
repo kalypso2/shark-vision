@@ -25,6 +25,7 @@ export default function PythonAnalysisPage() {
   const [elapsedTime, setElapsedTime] = useState(0)
   const [noDetection, setNoDetection] = useState(false)
   const [processingComplete, setProcessingComplete] = useState(false)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
 
   // Setup WebSocket callbacks
   useEffect(() => {
@@ -40,11 +41,13 @@ export default function PythonAnalysisPage() {
       console.log('❌ Disconnected from Python backend')
     }
 
-    wsClient.onUpdate = (data: RealtimeUpdate) => {
-      setLiveStatus(data.live_status)  // Use live status instead of metrics
-      setFrameCount(data.frame)
-      setElapsedTime(data.timestamp)
-      setNoDetection(false)
+    wsClient.onUpdate = (data: any) => {
+      // Handle progress updates (live metrics disabled)
+      if (data.type === 'progress') {
+        setFrameCount(data.frame)
+        setElapsedTime(data.timestamp)
+        setNoDetection(false)
+      }
     }
 
     wsClient.onFinal = (data: FinalAnalysis) => {
@@ -86,6 +89,11 @@ export default function PythonAnalysisPage() {
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
         setStream(mediaStream)
+        try {
+          await videoRef.current.play()
+        } catch (playError) {
+          console.warn('Video play was interrupted:', playError)
+        }
       }
     } catch (err) {
       setError('Failed to access webcam. Please grant camera permissions.')
@@ -143,14 +151,12 @@ export default function PythonAnalysisPage() {
     // Get session ID before disconnecting
     const sessionId = wsClient.getCurrentSessionId()
     console.log('Session ID:', sessionId)
+    setCurrentSessionId(sessionId)
     
     // Stop sending frames first
     wsClient.stopStreaming()
     
-    // Wait a moment for any pending frames to finish
-    await new Promise(resolve => setTimeout(resolve, 100))
-    
-    // Disconnect triggers backend's finally block
+    // Disconnect triggers backend's finally block (no wait needed)
     wsClient.disconnect()
     
     // Show processing message
@@ -166,7 +172,7 @@ export default function PythonAnalysisPage() {
   // Poll backend to check when analysis is ready
   const pollForResults = async (sessionId: string) => {
     let attempts = 0
-    const maxAttempts = 60 // 60 seconds max
+    const maxAttempts = 240 // 240 checks * 250ms = 60 seconds max
     
     const checkInterval = setInterval(async () => {
       attempts++
@@ -181,21 +187,32 @@ export default function PythonAnalysisPage() {
           setProcessingComplete(false)
           router.push(`/results-python/${sessionId}`)
         } else if (attempts >= maxAttempts) {
-          // Timeout
+          // Timeout - but provide manual redirect option
           console.error('⏱️ Timeout waiting for results')
           clearInterval(checkInterval)
-          setError('Analysis timeout. Check terminal for session ID.')
-        } else {
-          console.log(`⏳ Waiting... (${attempts}s)`)
+          setProcessingComplete(false)
+          setError(`Analysis took longer than expected. Session: ${sessionId}`)
+          // Try to redirect anyway - session might exist now
+          setTimeout(() => {
+            router.push(`/results-python/${sessionId}`)
+          }, 2000)
+        } else if (attempts % 4 === 0) {
+          // Log every 1 second (4 * 250ms)
+          console.log(`⏳ Waiting... (${(attempts * 0.25).toFixed(1)}s)`)
         }
       } catch (err) {
         if (attempts >= maxAttempts) {
           console.error('❌ Failed to check results:', err)
           clearInterval(checkInterval)
-          setError('Failed to retrieve results. Check terminal for session ID.')
+          setProcessingComplete(false)
+          setError(`Connection error. Session: ${sessionId}`)
+          // Try to redirect anyway
+          setTimeout(() => {
+            router.push(`/results-python/${sessionId}`)
+          }, 2000)
         }
       }
-    }, 1000) // Check every 1 second
+    }, 250) // Check every 250ms
   }
 
   // Cleanup on unmount
@@ -228,45 +245,80 @@ export default function PythonAnalysisPage() {
             maxWidth: '500px',
             color: '#000'
           }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
-              ⏳ Generating Analysis...
-            </h2>
-            <p style={{ marginBottom: '1rem', lineHeight: 1.6 }}>
-              Processing your presentation (10-30 seconds):
-            </p>
-            <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.5rem', lineHeight: 1.8 }}>
-              <li>✅ Finalizing video</li>
-              <li>✅ Calculating scores</li>
-              <li>⏳ Generating AI coaching...</li>
-            </ul>
-            <div style={{
-              padding: '1rem',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              marginBottom: '1rem',
-              textAlign: 'center'
-            }}>
-              <strong>🔄 Auto-redirecting when complete...</strong>
-            </div>
-            <button
-              onClick={() => {
-                setProcessingComplete(false)
-                router.push('/')
-              }}
-              style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: '#007bff',
+              <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+                ⏳ Generating Analysis...
+              </h2>
+              <p style={{ marginBottom: '1rem', lineHeight: 1.6 }}>
+                Processing your presentation (typically 5-10 seconds):
+              </p>
+              <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.5rem', lineHeight: 1.8 }}>
+                <li>✅ Finalizing video</li>
+                <li>✅ Calculating scores</li>
+                <li>⏳ Generating AI coaching...</li>
+              </ul>
+              {currentSessionId && (
+                <div style={{
+                  padding: '0.75rem',
+                  backgroundColor: '#f0f0f0',
+                  borderRadius: '8px',
+                  fontSize: '0.75rem',
+                  marginBottom: '1rem',
+                  fontFamily: 'monospace',
+                  color: '#666'
+                }}>
+                  Session: {currentSessionId}
+                </div>
+              )}
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#4CAF50',
                 color: 'white',
-                border: 'none',
                 borderRadius: '8px',
-                cursor: 'pointer',
-                width: '100%'
-              }}
-            >
-              Return to Home
-            </button>
+                fontSize: '0.85rem',
+                marginBottom: '1rem',
+                textAlign: 'center'
+              }}>
+                <strong>🔄 Auto-redirecting when complete...</strong>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {currentSessionId && (
+                  <button
+                    onClick={() => {
+                      setProcessingComplete(false)
+                      router.push(`/results-python/${currentSessionId}`)
+                    }}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      backgroundColor: '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      flex: 1
+                    }}
+                  >
+                    View Results Now
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setProcessingComplete(false)
+                    router.push('/')
+                  }}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    flex: currentSessionId ? 0 : 1,
+                    minWidth: currentSessionId ? '100px' : undefined
+                  }}
+                >
+                  Home
+                </button>
+              </div>
           </div>
         </div>
       )}
@@ -311,7 +363,7 @@ export default function PythonAnalysisPage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto', marginBottom: '2rem' }}>
         {/* Video Panel */}
         <div>
           <div style={{
@@ -446,103 +498,26 @@ export default function PythonAnalysisPage() {
               </button>
             )}
           </div>
-        </div>
-
-        {/* Real-time Metrics Panel */}
-        <div>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Real-Time Metrics</h2>
           
-          <div style={{
-            padding: '1rem',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            marginBottom: '1rem'
-          }}>
-            <div style={{ fontSize: '0.9rem', color: '#555', marginBottom: '0.5rem' }}>Status</div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isConnected ? '#28a745' : '#6c757d' }}>
-              {isConnected ? '🟢 Connected' : '⚪ Disconnected'}
+          {/* Progress Indicator */}
+          {isRecording && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '1rem',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '0.9rem', color: '#555', marginBottom: '0.5rem' }}>
+                {isConnected ? '🟢 Analyzing' : '⚪ Connecting...'}
+              </div>
+              <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: '#000' }}>
+                {frameCount} frames processed
+              </div>
+              <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.25rem' }}>
+                {elapsedTime.toFixed(1)}s elapsed
+              </div>
             </div>
-          </div>
-
-          <div style={{
-            padding: '1rem',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            marginBottom: '1rem'
-          }}>
-            <div style={{ fontSize: '0.9rem', color: '#555', marginBottom: '0.5rem' }}>Frames Processed</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#000' }}>{frameCount}</div>
-            <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.25rem' }}>
-              {elapsedTime.toFixed(1)}s elapsed
-            </div>
-          </div>
-
-          {liveStatus && (
-            <>
-              <div style={{
-                padding: '1rem',
-                backgroundColor: liveStatus.posture === 'good' ? '#28a745' : '#dc3545',
-                borderRadius: '8px',
-                marginBottom: '1rem',
-                color: 'white'
-              }}>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Posture</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                  {liveStatus.posture === 'good' ? '✅ GOOD' : '❌ BAD'}
-                </div>
-              </div>
-
-              <div style={{
-                padding: '1rem',
-                backgroundColor: liveStatus.smile === 'good' ? '#28a745' : '#6c757d',
-                borderRadius: '8px',
-                marginBottom: '1rem',
-                color: 'white'
-              }}>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Smile</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                  {liveStatus.smile === 'good' ? '😊 SMILING' : '😐 NEUTRAL'}
-                </div>
-              </div>
-
-              <div style={{
-                padding: '1rem',
-                backgroundColor: liveStatus.gestures === 'good' ? '#28a745' : '#dc3545',
-                borderRadius: '8px',
-                marginBottom: '1rem',
-                color: 'white'
-              }}>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Gestures</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                  {liveStatus.gestures === 'good' ? '👍 GOOD' : '❌ LOW'}
-                </div>
-              </div>
-
-              <div style={{
-                padding: '1rem',
-                backgroundColor: liveStatus.eye_contact === 'good' ? '#28a745' : '#dc3545',
-                borderRadius: '8px',
-                marginBottom: '1rem',
-                color: 'white'
-              }}>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Eye Contact</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                  {liveStatus.eye_contact === 'good' ? '👁️ GOOD' : '👀 OFF'}
-                </div>
-              </div>
-
-              <div style={{
-                padding: '1rem',
-                backgroundColor: liveStatus.engagement === 'good' ? '#28a745' : '#ffc107',
-                borderRadius: '8px',
-                color: liveStatus.engagement === 'good' ? 'white' : '#000'
-              }}>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Engagement</div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-                  {liveStatus.engagement === 'good' ? '⚡ ENGAGED' : '💤 LOW'}
-                </div>
-              </div>
-            </>
           )}
         </div>
       </div>
@@ -557,6 +532,16 @@ export default function PythonAnalysisPage() {
         <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
           📊 Analysis Features
         </h3>
+        <div style={{ 
+          padding: '0.75rem', 
+          backgroundColor: '#fff', 
+          borderRadius: '6px', 
+          marginBottom: '1rem',
+          fontSize: '0.9rem',
+          color: '#555'
+        }}>
+          💡 <strong>Note:</strong> Full analysis with detailed scores and AI coaching will be shown after you stop recording.
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div>
             <div style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: '#000' }}>Total Landmarks</div>

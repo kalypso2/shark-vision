@@ -7,13 +7,18 @@ Ported from Kyle's Flask app for integration with body language analysis
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 from PIL import Image
 import io
 import json
 from typing import Dict, List, Optional, Tuple
 import logging
 
-load_dotenv()
+# Load environment variables from multiple locations (same as coaching.py)
+BACKEND_DIR = Path(__file__).resolve().parent
+load_dotenv(BACKEND_DIR / ".env")
+load_dotenv(BACKEND_DIR.parent / ".env")
+load_dotenv(BACKEND_DIR.parent / ".env.local")
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +26,8 @@ logger = logging.getLogger(__name__)
 try:
     api_key = os.getenv('GEMINI_API_KEY')
     if not api_key:
-        logger.warning("GEMINI_API_KEY not found in environment")
+        logger.warning("⚠️  GEMINI_API_KEY not found in environment")
+        logger.warning("    Checked: backend/.env, .env, .env.local")
     else:
         genai.configure(api_key=api_key)
         logger.info("✅ Gemini configured for slide analysis")
@@ -57,11 +63,23 @@ class SlideAnalyzer:
             model_name: Gemini model to use for analysis
         """
         try:
+            # Ensure Gemini is configured with API key
+            api_key = os.getenv('GEMINI_API_KEY')
+            if not api_key:
+                logger.error("❌ GEMINI_API_KEY not found - slide analysis will be disabled")
+                self.model = None
+                return
+            
+            genai.configure(api_key=api_key)
             self.model = genai.GenerativeModel(model_name)
             logger.info(f"✅ Slide analyzer initialized with model: {model_name}")
         except Exception as e:
-            logger.error(f"Failed to initialize Gemini model: {e}")
+            logger.error(f"❌ Failed to initialize Gemini model: {e}")
             self.model = None
+    
+    def is_configured(self) -> bool:
+        """Check if Gemini model is configured and ready"""
+        return self.model is not None
     
     def analyze_frame(self, image_data: bytes) -> Dict:
         """Analyze a single frame/slide

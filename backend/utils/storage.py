@@ -17,13 +17,16 @@ class StorageManager:
     """Manages persistent storage of analysis sessions"""
     
     def __init__(self, base_path: str = "./storage"):
-        self.base_path = Path(base_path)
+        # Always resolve to absolute path to avoid issues with CWD changes during reloads
+        self.base_path = Path(base_path).resolve()
         self.analysis_path = self.base_path / "analysis"
         self.videos_path = self.base_path / "videos"
         
         # Create directories
         self.analysis_path.mkdir(parents=True, exist_ok=True)
         self.videos_path.mkdir(parents=True, exist_ok=True)
+        
+        logger.info(f"💾 Storage initialized: {self.base_path}")
     
     def save_analysis(self, session_id: str, analysis: Dict, coaching: str, slide_analysis: Optional[Dict] = None) -> bool:
         """
@@ -79,15 +82,18 @@ class StorageManager:
             
             if not file_path.exists():
                 logger.warning(f"Session not found: {session_id}")
+                logger.debug(f"Looked in: {file_path}")
+                logger.debug(f"Base path: {self.base_path}")
                 return None
             
             with open(file_path, 'r') as f:
                 data = json.load(f)
             
+            logger.debug(f"✅ Loaded session: {session_id}")
             return data
         
         except Exception as e:
-            logger.error(f"Error loading analysis: {e}", exc_info=True)
+            logger.error(f"Error loading analysis for {session_id}: {e}", exc_info=True)
             return None
     
     def list_sessions(self) -> list[str]:

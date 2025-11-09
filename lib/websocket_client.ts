@@ -219,56 +219,75 @@ export class AnalysisWebSocketClient {
     this.streaming = true
     const intervalMs = 1000 / fps
 
-    this.streamInterval = setInterval(() => {
+    let framesSent = 0
+    
+    // Use recursive setTimeout instead of setInterval for better async handling
+    const captureAndSend = () => {
       if (!this.streaming || !this.videoElement || !this.canvasElement || !this.ctx) {
         return
       }
 
+      const track = (this.videoElement.srcObject as MediaStream | null)?.getVideoTracks()?.[0]
+      const settings = track?.getSettings()
+
       const width =
         this.videoElement.videoWidth ||
+        settings?.width ||
         this.videoElement.clientWidth ||
         this.videoElement.getBoundingClientRect().width ||
         640
       const height =
         this.videoElement.videoHeight ||
+        settings?.height ||
         this.videoElement.clientHeight ||
         this.videoElement.getBoundingClientRect().height ||
         480
 
       if (width === 0 || height === 0) {
+        if (this.streaming) {
+          setTimeout(captureAndSend, intervalMs)
+        }
         return
       }
 
       if (this.canvasElement.width !== width || this.canvasElement.height !== height) {
         this.canvasElement.width = width
         this.canvasElement.height = height
+        console.log(`📐 Canvas resized to: ${width}x${height}`)
       }
 
       // Draw current video frame to canvas
       this.ctx.drawImage(this.videoElement, 0, 0, width, height)
+      framesSent++
 
-      // Convert to JPEG and send
+      // Convert to JPEG and send (fire-and-forget)
       this.canvasElement.toBlob(
         (blob) => {
-          if (!blob || this.ws?.readyState !== WebSocket.OPEN) {
-            return
-          }
-
-          blob
-            .arrayBuffer()
-            .then((buffer) => {
-              if (this.ws?.readyState === WebSocket.OPEN) {
-                this.ws.send(buffer)
+          if (blob && this.ws && this.ws.readyState === WebSocket.OPEN) {
+            blob.arrayBuffer().then((buffer) => {
+              if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                const bytes = new Uint8Array(buffer)
+                this.ws.send(bytes)
+                
+                if (framesSent % 30 === 0) {
+                  console.log(`📤 Frame ${framesSent} sent (${bytes.length} bytes)`)
+                }
               }
             })
-            .catch((error) => {
-              console.error('Error converting frame blob:', error)
-            })
+          }
         },
         'image/jpeg',
-        0.8 // Quality: 80%
+        0.7
       )
-    }, intervalMs)
+      
+      // Schedule next capture immediately (don't wait for blob conversion)
+      if (this.streaming) {
+        setTimeout(captureAndSend, intervalMs)
+      }
+    }
+    
+    // Start the capture loop
+    captureAndSend()
 
     console.log(`📹 Streaming at ${fps} FPS`)
   }
@@ -291,10 +310,13 @@ export class AnalysisWebSocketClient {
         return
       }
 
+      const track = (this.videoElement.srcObject as MediaStream | null)?.getVideoTracks()?.[0]
+      const settings = track?.getSettings()
+
       const isReady =
         this.videoElement.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
-        this.videoElement.videoWidth > 0 &&
-        this.videoElement.videoHeight > 0
+        (this.videoElement.videoWidth > 0 || (settings?.width ?? 0) > 0) &&
+        (this.videoElement.videoHeight > 0 || (settings?.height ?? 0) > 0)
 
       if (isReady) {
         resolve()
