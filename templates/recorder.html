@@ -9,7 +9,7 @@
         .container { max-width: 1600px; margin: 0 auto; }
         .header { text-align: center; color: white; margin-bottom: 20px; }
         .header h1 { font-size: 2.5em; margin-bottom: 5px; }
-        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px; }
         .video-section { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
         #videoPreview { width: 100%; border-radius: 10px; background: #000; max-height: 500px; }
         .controls { margin-top: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -69,6 +69,21 @@
         .report-severity.low { background: #10b981; color: white; }
         .report-issue-text { font-weight: 600; color: #1f2937; margin: 10px 0; }
         .report-suggestion { color: #6b7280; padding-left: 15px; border-left: 3px solid #d1d5db; margin-top: 8px; }
+        
+        /* Speech Coach Panel Styles */
+        .speech-panel { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 650px; overflow-y: auto; }
+        .speech-panel h2 { margin-bottom: 15px; color: #1f2937; font-size: 1.5em; }
+        .oral-score-display { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; }
+        .oral-score-display .score-value { font-size: 3em; font-weight: bold; margin: 10px 0; }
+        .oral-score-display .score-label { font-size: 1.1em; opacity: 0.9; }
+        .score-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .score-item { background: #f3f4f6; padding: 12px; border-radius: 8px; }
+        .score-item .label { font-size: 12px; color: #6b7280; margin-bottom: 5px; }
+        .score-item .value { font-size: 18px; font-weight: bold; color: #1f2937; }
+        .speech-issue-item { background: #fff; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .speech-issue-item.high { border-left-color: #f59e0b; background: #fef3c7; }
+        .speech-issue-item.medium { border-left-color: #3b82f6; background: #dbeafe; }
+        .speech-issue-item.low { border-left-color: #10b981; background: #d1fae5; }
     </style>
 </head>
 <body>
@@ -115,6 +130,41 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="speech-panel">
+                <h2>🎤 Speech Coach</h2>
+                <div id="speechCoachContent">
+                    <div class="oral-score-display" id="oralScoreDisplay" style="display: none;">
+                        <div class="score-label">Oral Presentation Score</div>
+                        <div class="score-value" id="oralScoreValue">-</div>
+                        <div class="score-label">out of 10</div>
+                    </div>
+                    <div class="score-breakdown" id="scoreBreakdown" style="display: none;">
+                        <div class="score-item">
+                            <div class="label">Dialect/Pronunciation</div>
+                            <div class="value" id="dialectScore">2.5</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="label">Grammar</div>
+                            <div class="value" id="grammarScore">2.5</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="label">Filler Words</div>
+                            <div class="value" id="fillerScore">2.5</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="label">Pace</div>
+                            <div class="value" id="paceScore">2.5</div>
+                        </div>
+                    </div>
+                    <div id="speechIssuesList">
+                        <div class="empty-state">
+                            <p>No speech issues detected yet</p>
+                            <p style="font-size: 12px; margin-top: 5px;">Start recording to analyze your speech</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Report Section -->
@@ -143,6 +193,7 @@
         const avgScoreEl = document.getElementById('avgScore');
         
         let mediaStream = null;
+        let audioRecorder = null;
         let isRecording = false;
         let sessionId = null;
         let startTime = null;
@@ -153,16 +204,26 @@
         let totalScore = 0;
         let scoreCount = 0;
         let allIssues = [];
+        let allSpeechIssues = [];
+        let oralScore = 10.0;
+        let speechScores = {
+            dialect: 2.5,
+            grammar: 2.5,
+            filler_words: 2.5,
+            pace: 2.5
+        };
+        let audioChunkNumber = 0;
         
         async function initWebcam() {
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: 1280, height: 720 }
+                    video: { width: 1280, height: 720 },
+                    audio: true
                 });
                 videoPreview.srcObject = mediaStream;
-                console.log('✅ Webcam initialized');
+                console.log('✅ Webcam and microphone initialized');
             } catch (err) {
-                console.error('❌ Webcam error:', err);
+                console.error('❌ Webcam/microphone error:', err);
                 alert('Could not access webcam/microphone: ' + err.message);
             }
         }
@@ -185,6 +246,24 @@
                 totalScore = 0;
                 scoreCount = 0;
                 allIssues = [];
+                allSpeechIssues = [];
+                oralScore = 10.0;
+                speechScores = { dialect: 2.5, grammar: 2.5, filler_words: 2.5, pace: 2.5 };
+                audioChunkNumber = 0;
+                
+                // Start audio recording
+                if (mediaStream && mediaStream.getAudioTracks().length > 0) {
+                    const audioTracks = mediaStream.getAudioTracks();
+                    const audioStream = new MediaStream(audioTracks);
+                    audioRecorder = new MediaRecorder(audioStream, { mimeType: 'audio/webm' });
+                    audioRecorder.start(5000); // Collect 5-second chunks
+                    
+                    audioRecorder.ondataavailable = async (event) => {
+                        if (event.data.size > 0 && isRecording) {
+                            await sendAudioChunk(event.data);
+                        }
+                    };
+                }
                 
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
@@ -193,6 +272,7 @@
                 statusBadge.className = 'status-badge recording';
                 timerEl.className = 'timer recording';
                 issuesList.innerHTML = '<div class="empty-state"><p>Analyzing...</p></div>';
+                document.getElementById('speechIssuesList').innerHTML = '<div class="empty-state"><p>Analyzing speech...</p></div>';
                 document.getElementById('reportSection').style.display = 'none';
                 timerInterval = setInterval(updateTimer, 1000);
                 captureInterval = setInterval(captureAndAnalyze, 3000);
@@ -210,6 +290,13 @@
                 clearInterval(timerInterval);
                 clearInterval(captureInterval);
                 
+                // Stop audio recorder and capture final chunk
+                if (audioRecorder && audioRecorder.state !== 'inactive') {
+                    audioRecorder.stop();
+                    // Wait a moment for final chunk
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
                 const duration = (Date.now() - startTime) / 1000;
                 const res = await fetch('/stop-recording', {
                     method: 'POST',
@@ -218,6 +305,14 @@
                 });
                 
                 const data = await res.json();
+                
+                // Update speech data from final response
+                if (data.oral_presentation_score !== undefined) {
+                    oralScore = data.oral_presentation_score;
+                    speechScores = data.speech_scores || speechScores;
+                    allSpeechIssues = data.speech_issues || allSpeechIssues;
+                    updateSpeechDisplay();
+                }
                 
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
@@ -232,6 +327,84 @@
                 alert('Error stopping recording: ' + err.message);
             }
         });
+        
+        async function sendAudioChunk(audioBlob) {
+            if (!isRecording || !sessionId) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, `audio_${audioChunkNumber}.webm`);
+                formData.append('session_id', sessionId);
+                formData.append('timestamp', ((Date.now() - startTime) / 1000).toString());
+                formData.append('chunk_number', audioChunkNumber.toString());
+                
+                const res = await fetch('/capture-audio-chunk', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await res.json();
+                
+                if (data.success && data.transcribed) {
+                    audioChunkNumber++;
+                    
+                    // Update speech scores
+                    if (data.speech_scores) {
+                        speechScores = data.speech_scores;
+                        oralScore = data.oral_score || oralScore;
+                        updateSpeechDisplay();
+                    }
+                    
+                    // Display new speech issues
+                    if (data.new_speech_issues && data.new_speech_issues.length > 0) {
+                        if (allSpeechIssues.length === 0) {
+                            document.getElementById('speechIssuesList').innerHTML = '';
+                        }
+                        
+                        data.new_speech_issues.forEach(issue => {
+                            allSpeechIssues.push(issue);
+                            displaySpeechIssue(issue);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('❌ Audio chunk error:', err);
+            }
+        }
+        
+        function updateSpeechDisplay() {
+            // Update oral score display
+            const oralScoreDisplay = document.getElementById('oralScoreDisplay');
+            const oralScoreValue = document.getElementById('oralScoreValue');
+            const scoreBreakdown = document.getElementById('scoreBreakdown');
+            
+            if (oralScore !== undefined) {
+                oralScoreDisplay.style.display = 'block';
+                oralScoreValue.textContent = oralScore.toFixed(1);
+                scoreBreakdown.style.display = 'grid';
+                
+                document.getElementById('dialectScore').textContent = speechScores.dialect?.toFixed(1) || '2.5';
+                document.getElementById('grammarScore').textContent = speechScores.grammar?.toFixed(1) || '2.5';
+                document.getElementById('fillerScore').textContent = speechScores.filler_words?.toFixed(1) || '2.5';
+                document.getElementById('paceScore').textContent = speechScores.pace?.toFixed(1) || '2.5';
+            }
+        }
+        
+        function displaySpeechIssue(issue) {
+            const issueEl = document.createElement('div');
+            issueEl.className = `speech-issue-item ${issue.severity || 'medium'}`;
+            issueEl.innerHTML = `
+                <div>
+                    <span class="issue-timestamp">⏱️ ${issue.timestamp_formatted}</span>
+                    <span class="issue-category">${issue.category}</span>
+                    <span class="severity-badge ${issue.severity || 'medium'}">${issue.severity || 'medium'}</span>
+                </div>
+                <div class="issue-text">${issue.issue}</div>
+                <div class="issue-suggestion">💡 ${issue.suggestion}</div>
+            `;
+            const speechIssuesList = document.getElementById('speechIssuesList');
+            speechIssuesList.insertBefore(issueEl, speechIssuesList.firstChild);
+        }
         
         reportBtn.addEventListener('click', generateReport);
         
@@ -340,7 +513,7 @@
                 <div class="report-summary">
                     <h3>📊 Presentation Analysis Summary</h3>
                     <p style="font-size: 1.1em; margin-bottom: 15px;">${overallAssessment}</p>
-                    <div class="stats-row">
+                    <div class="stats-row" style="grid-template-columns: repeat(5, 1fr);">
                         <div class="stat">
                             <div class="stat-value">${durationFormatted}</div>
                             <div class="stat-label">Duration</div>
@@ -351,15 +524,77 @@
                         </div>
                         <div class="stat">
                             <div class="stat-value">${allIssues.length}</div>
-                            <div class="stat-label">Issues Found</div>
+                            <div class="stat-label">Visual Issues</div>
                         </div>
                         <div class="stat">
                             <div class="stat-value">${avgScore.toFixed(1)}/10</div>
-                            <div class="stat-label">Avg Score</div>
+                            <div class="stat-label">Visual Score</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${oralScore.toFixed(1)}/10</div>
+                            <div class="stat-label">Oral Score</div>
                         </div>
                     </div>
                 </div>
             `;
+            
+            // Add Speech Analysis Section
+            reportHTML += `
+                <div class="report-issues" style="margin-top: 25px;">
+                    <h3>🎤 Speech Analysis</h3>
+                    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 5px;">Oral Presentation Score</div>
+                        <div style="font-size: 3em; font-weight: bold;">${oralScore.toFixed(1)}/10</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+                        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Dialect/Pronunciation</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #1f2937;">${speechScores.dialect?.toFixed(1) || '2.5'}/2.5</div>
+                        </div>
+                        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Grammar</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #1f2937;">${speechScores.grammar?.toFixed(1) || '2.5'}/2.5</div>
+                        </div>
+                        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Filler Words</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #1f2937;">${speechScores.filler_words?.toFixed(1) || '2.5'}/2.5</div>
+                        </div>
+                        <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Pace</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #1f2937;">${speechScores.pace?.toFixed(1) || '2.5'}/2.5</div>
+                        </div>
+                    </div>
+            `;
+            
+            if (allSpeechIssues.length > 0) {
+                reportHTML += `
+                    <h4 style="color: #1f2937; margin-bottom: 15px;">Speech Issues Detected (${allSpeechIssues.length} total)</h4>
+                `;
+                
+                const sortedSpeechIssues = [...allSpeechIssues].sort((a, b) => a.timestamp - b.timestamp);
+                
+                sortedSpeechIssues.forEach(issue => {
+                    reportHTML += `
+                        <div class="report-issue-item ${issue.severity || 'medium'}">
+                            <div class="report-timestamp">⏱️ ${issue.timestamp_formatted}</div>
+                            <div style="margin-bottom: 8px;">
+                                <span class="report-category">${issue.category}</span>
+                                <span class="report-severity ${issue.severity || 'medium'}">${issue.severity || 'medium'}</span>
+                            </div>
+                            <div class="report-issue-text">${issue.issue}</div>
+                            <div class="report-suggestion">💡 ${issue.suggestion}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                reportHTML += `
+                    <div style="text-align: center; padding: 20px; color: #10b981;">
+                        <p>🎉 No speech issues detected! Excellent oral presentation skills.</p>
+                    </div>
+                `;
+            }
+            
+            reportHTML += '</div>';
             
             if (allIssues.length > 0) {
                 reportHTML += `
