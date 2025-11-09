@@ -1,5 +1,6 @@
+'use client'
+
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function Home() {
   return (
@@ -10,25 +11,7 @@ export default function Home() {
       justifyContent: 'center',
       minHeight: '100vh',
       padding: '2rem',
-      position: 'relative',
     }}>
-      {/* Floating Logo */}
-      <div style={{
-        position: 'absolute',
-        top: '20px',
-        left: '20px',
-        animation: 'float 3s ease-in-out infinite',
-        zIndex: 10,
-      }}>
-        <Image
-          src="/sharkvision_logo.png"
-          alt="SharkVision Logo"
-          width={180}
-          height={180}
-          priority
-        />
-      </div>
-
       <h1 style={{
         fontSize: '3rem',
         fontWeight: 'bold',
