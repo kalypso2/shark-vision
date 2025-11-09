@@ -28,7 +28,7 @@ class StorageManager:
         
         logger.info(f"💾 Storage initialized: {self.base_path}")
     
-    def save_analysis(self, session_id: str, analysis: Dict, coaching: str, slide_analysis: Optional[Dict] = None) -> bool:
+    def save_analysis(self, session_id: str, analysis: Dict, coaching: str, slide_analysis: Optional[Dict] = None, speech_analysis: Optional[Dict] = None) -> bool:
         """
         Save analysis and coaching to disk
         
@@ -37,17 +37,19 @@ class StorageManager:
             analysis: Full analysis dict
             coaching: Coaching feedback string
             slide_analysis: Optional slide content analysis data
+            speech_analysis: Optional speech/audio analysis data
         
         Returns:
             True if successful
         """
         try:
-            # Combine analysis, coaching, and slide analysis
+            # Combine analysis, coaching, slide analysis, and speech analysis
             data = self._sanitize({
                 'session_id': session_id,
                 'analysis': analysis,
                 'coaching': coaching,
-                'slide_analysis': slide_analysis
+                'slide_analysis': slide_analysis,
+                'speech_analysis': speech_analysis
             })
             
             # Save atomically: write to temp then replace

@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AnalysisWebSocketClient, RealtimeUpdate, FinalAnalysis, AnalysisMetrics } from '@/lib/websocket_client'
+import { AudioClient } from '@/lib/audio_client'
 import { useRouter } from 'next/navigation'
 
 export default function PythonAnalysisPage() {
@@ -14,6 +15,7 @@ export default function PythonAnalysisPage() {
   const router = useRouter()
   
   const [wsClient] = useState(() => new AnalysisWebSocketClient('ws://localhost:8000/ws/analyze'))
+  const [audioClient] = useState(() => new AudioClient('http://localhost:8000'))
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
@@ -129,11 +131,29 @@ export default function PythonAnalysisPage() {
       // Connect to backend
       await wsClient.connect()
       
+      // Wait for session ID
+      const sessionId = wsClient.getCurrentSessionId()
+      if (!sessionId) {
+        // Wait a bit for session ID to arrive
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+      
       // Set video element
       wsClient.setVideoElement(videoRef.current)
       
       // Start streaming frames
       await wsClient.startStreaming(10) // 10 FPS
+      
+      // Start audio capture (with session ID)
+      const finalSessionId = wsClient.getCurrentSessionId()
+      if (finalSessionId) {
+        try {
+          await audioClient.startCapture(finalSessionId)
+          console.log('🎤 Audio capture started')
+        } catch (audioErr) {
+          console.warn('Audio capture failed, continuing without speech analysis:', audioErr)
+        }
+      }
       
       console.log('🎥 Recording started with Python backend')
     } catch (err) {
@@ -155,6 +175,14 @@ export default function PythonAnalysisPage() {
     
     // Stop sending frames first
     wsClient.stopStreaming()
+    
+    // Stop audio capture
+    try {
+      await audioClient.stopCapture()
+      console.log('🎤 Audio capture stopped')
+    } catch (audioErr) {
+      console.warn('Error stopping audio:', audioErr)
+    }
     
     // Disconnect triggers backend's finally block (no wait needed)
     wsClient.disconnect()
@@ -220,6 +248,7 @@ export default function PythonAnalysisPage() {
     return () => {
       stopWebcam()
       wsClient.disconnect()
+      audioClient.stopCapture().catch(err => console.error('Cleanup audio error:', err))
     }
   }, [])
 

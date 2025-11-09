@@ -4,7 +4,7 @@ FastAPI + MediaPipe Holistic + RAG System
 Real-time webcam body language analysis
 """
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
@@ -23,6 +23,8 @@ from slide_analyzer import get_slide_analyzer
 from utils.frame_processor import FrameProcessor
 from utils.storage import StorageManager
 from utils.video_recorder import VideoRecorder
+from utils.audio_recorder import AudioRecorder
+from speech import SpeechTranscriber, SpeechAnalyzer
 from fastapi.responses import FileResponse
 from pathlib import Path as FilePath
 import base64
@@ -134,12 +136,19 @@ async def analyze_stream(websocket: WebSocket):
     analyzer = BodyLanguageAnalyzer(session_id)
     frame_processor = FrameProcessor()
     video_recorder = VideoRecorder(session_id, fps=10)
+    audio_recorder = AudioRecorder(session_id)
     slide_analyzer_instance = get_slide_analyzer()  # Get slide analyzer
+    speech_transcriber = SpeechTranscriber()
+    speech_analyzer = SpeechAnalyzer()
     
     # Slide analysis tracking (analyze every 30 seconds - slides don't change often)
     slide_analyses = []
     slide_analysis_interval = 30.0  # seconds
     last_slide_analysis_time = -slide_analysis_interval  # ensure immediate first capture
+    
+    # Speech transcription tracking
+    transcription_segments = []
+    full_transcript = ""
     
     frame_count = 0
     start_time = None  # Will be set on first frame
@@ -302,9 +311,34 @@ async def analyze_stream(websocket: WebSocket):
             'timestamped_issues': slide_analyses
         }
     
+    # Aggregate speech analysis data
+    speech_analysis_summary = None
+    if session_id in active_sessions_speech:
+        session_speech = active_sessions_speech[session_id]
+        full_transcript = session_speech['full_transcript'].strip()
+        
+        # Perform final analysis on full transcript
+        final_speech_analysis = session_speech['analyzer'].finalize(full_transcript)
+        
+        speech_analysis_summary = {
+            'oral_presentation_score': final_speech_analysis['oral_presentation_score'],
+            'scores': final_speech_analysis['scores'],
+            'total_issues': len(final_speech_analysis['issues']),
+            'issues': final_speech_analysis['issues'],
+            'dialect_feedback': final_speech_analysis['dialect_feedback'],
+            'grammar_feedback': final_speech_analysis['grammar_feedback'],
+            'segments': session_speech['segments'],
+            'full_transcript': full_transcript,
+            'total_chunks': len(session_speech['segments'])
+        }
+        
+        # Cleanup
+        del active_sessions_speech[session_id]
+        logger.info(f"🎤 Speech analysis complete: {final_speech_analysis['oral_presentation_score']:.1f}/10")
+    
     # Save immediately so frontend can find the session while coaching generates
     logger.info("💾 Saving session...")
-    saved = storage.save_analysis(session_id, analysis, coaching="", slide_analysis=slide_analysis_summary)
+    saved = storage.save_analysis(session_id, analysis, coaching="", slide_analysis=slide_analysis_summary, speech_analysis=speech_analysis_summary)
     if saved:
         logger.info(f"✅ Session saved → http://localhost:3001/results-python/{session_id}")
     else:
@@ -316,13 +350,112 @@ async def analyze_stream(websocket: WebSocket):
             rag_context = build_context(analysis)
             context_prompt = format_context_for_prompt(rag_context)
             coaching_text = await generate_coaching(analysis, context_prompt)
-            storage.save_analysis(session_id, analysis, coaching_text, slide_analysis=slide_analysis_summary)
+            storage.save_analysis(session_id, analysis, coaching_text, slide_analysis=slide_analysis_summary, speech_analysis=speech_analysis_summary)
             logger.info("✅ AI coaching complete")
         except Exception as e:
             logger.error(f"❌ Coaching failed: {e}")
     
     # Run coaching generation in background (non-blocking)
     asyncio.create_task(_finalize_coaching_and_update())
+
+# Global storage for audio/speech data during active sessions
+active_sessions_speech = {}
+
+@app.post("/api/sessions/{session_id}/audio")
+async def upload_audio_chunk(session_id: str, request: Request):
+    """
+    Receive audio chunk for speech analysis
+    
+    Args:
+        session_id: Session identifier
+        request: Raw request containing audio bytes (WebM/Opus format)
+    """
+    # Read raw audio bytes from request body
+    audio = await request.body()
+    
+    if not audio or len(audio) == 0:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "No audio data provided"}
+        )
+    
+    try:
+        # Initialize session speech data if needed
+        if session_id not in active_sessions_speech:
+            active_sessions_speech[session_id] = {
+                'audio_recorder': AudioRecorder(session_id),
+                'transcriber': SpeechTranscriber(),
+                'analyzer': SpeechAnalyzer(),
+                'segments': [],
+                'full_transcript': ""
+            }
+        
+        session_data = active_sessions_speech[session_id]
+        
+        # Determine file extension from request content type
+        content_type = request.headers.get('content-type', 'audio/webm')
+        extension = '.ogg' if 'ogg' in content_type else '.webm'
+        
+        # Save audio chunk
+        audio_path = session_data['audio_recorder'].save_chunk(audio, extension=extension)
+        
+        if not audio_path:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Failed to save audio chunk"}
+            )
+        
+        # Transcribe audio (if available)
+        transcription_status = "pending"
+        if session_data['transcriber'].is_available():
+            logger.info(f"🎤 Transcribing audio chunk {len(session_data['segments']) + 1}...")
+            transcript_text, segments = session_data['transcriber'].transcribe_audio(audio_path)
+            
+            if transcript_text:
+                # Analyze this segment
+                segment_duration = 5.0  # Approximate chunk duration
+                if segments:
+                    segment_duration = segments[-1]['end'] - segments[0]['start']
+                
+                # Get timestamp (seconds since recording start)
+                chunk_count = len(session_data['segments']) + 1
+                timestamp = chunk_count * 5.0  # Approximate
+                
+                # Analyze speech segment
+                analysis_result = session_data['analyzer'].analyze_segment(
+                    transcript_text,
+                    segment_duration,
+                    timestamp
+                )
+                
+                session_data['segments'].append(analysis_result)
+                session_data['full_transcript'] += transcript_text + " "
+                
+                logger.info(f"🎤 ✅ Transcribed chunk {chunk_count}: '{transcript_text[:50]}...'")
+                transcription_status = "success"
+            else:
+                logger.warning(f"🎤 ⚠️ Transcription returned empty for chunk {len(session_data['segments']) + 1}")
+                transcription_status = "empty"
+        else:
+            logger.warning("🎤 ⚠️ Speech transcriber not available (check GOOGLE_APPLICATION_CREDENTIALS)")
+            transcription_status = "unavailable"
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "message": "Audio chunk processed",
+                "transcription_status": transcription_status,
+                "chunks_processed": len(session_data['segments'])
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error processing audio chunk: {e}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
 
 @app.get("/api/sessions/{session_id}")
 async def get_session(session_id: str):

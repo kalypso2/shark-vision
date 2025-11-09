@@ -60,6 +60,26 @@ interface SessionData {
     total_issues: number
     timestamped_issues: SlideIssue[]
   }
+  speech_analysis?: {
+    oral_presentation_score: number
+    scores: {
+      dialect: number
+      grammar: number
+      filler_words: number
+      pace: number
+    }
+    total_issues: number
+    issues: Array<{
+      category: string
+      issue: string
+      severity: string
+      suggestion: string
+    }>
+    dialect_feedback: string
+    grammar_feedback: string
+    full_transcript: string
+    total_chunks: number
+  }
 }
 
 export default function PythonResultsPage() {
@@ -108,7 +128,7 @@ export default function PythonResultsPage() {
     )
   }
 
-  const { analysis, coaching, slide_analysis } = data
+  const { analysis, coaching, slide_analysis, speech_analysis } = data
   const { aggregates, session_meta, timeline } = analysis
 
   return (
@@ -382,6 +402,169 @@ export default function PythonResultsPage() {
                   )}
                 </div>
               ))}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Speech/Voice Delivery Analysis */}
+      {speech_analysis && speech_analysis.total_chunks > 0 && (
+        <div style={{
+          marginBottom: '2rem',
+          padding: '1.5rem',
+          backgroundColor: '#e8f5e9',
+          borderRadius: '8px',
+          border: '2px solid #4caf50'
+        }}>
+          <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: '#000' }}>
+            🎤 Speech & Voice Delivery Analysis
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>Oral Presentation Score</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4caf50' }}>
+                {speech_analysis.oral_presentation_score?.toFixed(1) ?? 'N/A'}/10
+              </div>
+            </div>
+            <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>Audio Chunks Analyzed</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#2196f3' }}>
+                {speech_analysis.total_chunks}
+              </div>
+            </div>
+            <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>Speech Issues</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ff9800' }}>
+                {speech_analysis.total_issues ?? 0}
+              </div>
+            </div>
+          </div>
+
+          {/* Score Breakdown */}
+          <h3 style={{ fontSize: '1.1rem', marginTop: '1.5rem', marginBottom: '1rem', color: '#000' }}>
+            📊 Score Breakdown (each out of 2.5)
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>Dialect/Pronunciation</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#4caf50' }}>
+                {speech_analysis.scores?.dialect?.toFixed(1) ?? 'N/A'}
+              </div>
+            </div>
+            <div style={{ padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>Grammar</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#2196f3' }}>
+                {speech_analysis.scores?.grammar?.toFixed(1) ?? 'N/A'}
+              </div>
+            </div>
+            <div style={{ padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>Filler Words</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ff9800' }}>
+                {speech_analysis.scores?.filler_words?.toFixed(1) ?? 'N/A'}
+              </div>
+            </div>
+            <div style={{ padding: '0.75rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>Pace/Timing</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#9c27b0' }}>
+                {speech_analysis.scores?.pace?.toFixed(1) ?? 'N/A'}
+              </div>
+            </div>
+          </div>
+
+          {/* Speech Issues */}
+          {speech_analysis.issues && speech_analysis.issues.length > 0 && (
+            <>
+              <h3 style={{ fontSize: '1.1rem', marginTop: '1.5rem', marginBottom: '1rem', color: '#000' }}>
+                ⚠️ Speech Issues Detected
+              </h3>
+              {speech_analysis.issues.map((issue, idx) => {
+                const severityColor = {
+                  critical: '#dc3545',
+                  high: '#fd7e14',
+                  medium: '#ffc107',
+                  low: '#28a745'
+                }[issue.severity] || '#6c757d'
+                
+                return (
+                  <div key={idx} style={{
+                    padding: '1rem',
+                    backgroundColor: 'white',
+                    borderRadius: '8px',
+                    marginBottom: '0.75rem',
+                    borderLeft: `4px solid ${severityColor}`
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <span style={{
+                        padding: '0.15rem 0.5rem',
+                        backgroundColor: severityColor,
+                        color: 'white',
+                        borderRadius: '8px',
+                        fontSize: '0.75rem',
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase'
+                      }}>
+                        {issue.severity}
+                      </span>
+                      <strong style={{ fontSize: '0.9rem', color: '#000' }}>{issue.category}</strong>
+                    </div>
+                    <div style={{ fontSize: '0.9rem', marginTop: '0.25rem', color: '#000' }}>
+                      <strong>Issue:</strong> {issue.issue}
+                    </div>
+                    <div style={{ fontSize: '0.9rem', marginTop: '0.25rem', color: '#28a745' }}>
+                      <strong>💡 Suggestion:</strong> {issue.suggestion}
+                    </div>
+                  </div>
+                )
+              })}
+            </>
+          )}
+
+          {/* Transcript */}
+          {speech_analysis.full_transcript && speech_analysis.full_transcript.length > 0 && (
+            <>
+              <h3 style={{ fontSize: '1.1rem', marginTop: '1.5rem', marginBottom: '1rem', color: '#000' }}>
+                📝 Full Transcript
+              </h3>
+              <div style={{
+                padding: '1rem',
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                fontSize: '0.9rem',
+                lineHeight: 1.6,
+                color: '#000',
+                fontFamily: 'Georgia, serif',
+                fontStyle: 'italic'
+              }}>
+                "{speech_analysis.full_transcript}"
+              </div>
+            </>
+          )}
+
+          {/* Feedback */}
+          {(speech_analysis.dialect_feedback || speech_analysis.grammar_feedback) && (
+            <>
+              <h3 style={{ fontSize: '1.1rem', marginTop: '1.5rem', marginBottom: '1rem', color: '#000' }}>
+                💬 Detailed Feedback
+              </h3>
+              {speech_analysis.dialect_feedback && (
+                <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px', marginBottom: '0.75rem' }}>
+                  <strong style={{ color: '#4caf50' }}>Pronunciation & Clarity:</strong>
+                  <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', lineHeight: 1.6, color: '#000' }}>
+                    {speech_analysis.dialect_feedback}
+                  </p>
+                </div>
+              )}
+              {speech_analysis.grammar_feedback && (
+                <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px' }}>
+                  <strong style={{ color: '#2196f3' }}>Grammar & Structure:</strong>
+                  <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', lineHeight: 1.6, color: '#000' }}>
+                    {speech_analysis.grammar_feedback}
+                  </p>
+                </div>
+              )}
             </>
           )}
         </div>
