@@ -37,10 +37,29 @@ interface Analysis {
   }
 }
 
+interface SlideIssue {
+  timestamp: number
+  timestamp_formatted: string
+  overall_score: number
+  issues: Array<{
+    category: string
+    issue: string
+    severity: string
+    suggestion: string
+  }>
+  summary: string
+}
+
 interface SessionData {
   session_id: string
   analysis: Analysis
   coaching: string
+  slide_analysis?: {
+    frames_analyzed: number
+    average_score: number
+    total_issues: number
+    timestamped_issues: SlideIssue[]
+  }
 }
 
 export default function PythonResultsPage() {
@@ -89,7 +108,7 @@ export default function PythonResultsPage() {
     )
   }
 
-  const { analysis, coaching } = data
+  const { analysis, coaching, slide_analysis } = data
   const { aggregates, session_meta, timeline } = analysis
 
   return (
@@ -198,27 +217,27 @@ export default function PythonResultsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <ScoreCard
             title="Posture"
-            score={aggregates.posture_score}
+            score={aggregates?.posture_score}
             description="% of time with good posture"
           />
           <ScoreCard
             title="Eye Contact"
-            score={aggregates.eye_contact_proxy}
+            score={aggregates?.eye_contact_proxy}
             description="% of time looking forward"
           />
           <ScoreCard
             title="Gestures"
-            score={aggregates.gesture_quality}
+            score={aggregates?.gesture_quality}
             description="% of time gesturing well"
           />
           <ScoreCard
             title="Smile"
-            score={aggregates.smile_score || 0}
+            score={aggregates?.smile_score}
             description="% of time smiling"
           />
           <ScoreCard
             title="Engagement"
-            score={aggregates.engagement_score}
+            score={aggregates?.engagement_score}
             description="% of time engaged"
           />
         </div>
@@ -244,6 +263,129 @@ export default function PythonResultsPage() {
           </div>
         </div>
       </div>
+
+      {/* Slide Content Analysis */}
+      {slide_analysis && slide_analysis.frames_analyzed > 0 && (
+        <div style={{
+          marginBottom: '2rem',
+          padding: '1.5rem',
+          backgroundColor: '#fff8e1',
+          borderRadius: '8px',
+          border: '2px solid #ffc107'
+        }}>
+          <h2 style={{ fontSize: '1.3rem', marginBottom: '1rem', color: '#000' }}>
+            📊 Slide Content Analysis
+          </h2>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>Slides Analyzed</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ffc107' }}>
+                {slide_analysis.frames_analyzed}
+              </div>
+            </div>
+            <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>Average Score</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#28a745' }}>
+                {slide_analysis.average_score?.toFixed(1) ?? 'N/A'}/10
+              </div>
+            </div>
+            <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>Issues Found</div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#dc3545' }}>
+                {slide_analysis.total_issues ?? 0}
+              </div>
+            </div>
+          </div>
+
+          {slide_analysis.timestamped_issues && slide_analysis.timestamped_issues.length > 0 && (
+            <>
+              <h3 style={{ fontSize: '1.2rem', marginTop: '1.5rem', marginBottom: '1rem', color: '#000' }}>
+                ⏰ Timestamped Slide Issues
+              </h3>
+              {slide_analysis.timestamped_issues.map((slide, idx) => (
+                <div key={idx} style={{
+                  padding: '1rem',
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  marginBottom: '1rem',
+                  borderLeft: `4px solid ${
+                    slide.overall_score >= 8 ? '#28a745' :
+                    slide.overall_score >= 6 ? '#ffc107' :
+                    slide.overall_score >= 4 ? '#fd7e14' : '#dc3545'
+                  }`
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <strong style={{ color: '#000' }}>
+                      📍 {slide.timestamp_formatted || `${slide.timestamp.toFixed(1)}s`}
+                    </strong>
+                    <span style={{ 
+                      padding: '0.25rem 0.75rem', 
+                      backgroundColor: slide.overall_score >= 7 ? '#d4edda' : '#f8d7da',
+                      color: slide.overall_score >= 7 ? '#155724' : '#721c24',
+                      borderRadius: '12px',
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold'
+                    }}>
+                      Score: {slide.overall_score}/10
+                    </span>
+                  </div>
+                  
+                  {slide.summary && (
+                    <p style={{ fontSize: '0.9rem', marginBottom: '0.75rem', opacity: 0.8, color: '#000' }}>
+                      {slide.summary}
+                    </p>
+                  )}
+                  
+                  {slide.issues && slide.issues.length > 0 && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      {slide.issues.map((issue, issueIdx) => {
+                        const severityColor = {
+                          critical: '#dc3545',
+                          high: '#fd7e14',
+                          medium: '#ffc107',
+                          low: '#28a745'
+                        }[issue.severity] || '#6c757d'
+                        
+                        return (
+                          <div key={issueIdx} style={{
+                            padding: '0.75rem',
+                            backgroundColor: '#f8f9fa',
+                            borderRadius: '6px',
+                            marginTop: '0.5rem',
+                            borderLeft: `3px solid ${severityColor}`
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                              <span style={{
+                                padding: '0.15rem 0.5rem',
+                                backgroundColor: severityColor,
+                                color: 'white',
+                                borderRadius: '8px',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                textTransform: 'uppercase'
+                              }}>
+                                {issue.severity}
+                              </span>
+                              <strong style={{ fontSize: '0.85rem', color: '#000' }}>{issue.category}</strong>
+                            </div>
+                            <div style={{ fontSize: '0.85rem', marginTop: '0.25rem', color: '#000' }}>
+                              <strong>Issue:</strong> {issue.issue}
+                            </div>
+                            <div style={{ fontSize: '0.85rem', marginTop: '0.25rem', color: '#28a745' }}>
+                              <strong>💡 Fix:</strong> {issue.suggestion}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
 
       {/* AI Coaching */}
       <div style={{
@@ -358,7 +500,10 @@ export default function PythonResultsPage() {
   )
 }
 
-function ScoreCard({ title, score, description }: { title: string; score: number; description: string }) {
+function ScoreCard({ title, score, description }: { title: string; score: number | undefined; description: string }) {
+  // Handle undefined/null scores
+  const safeScore = score ?? 0
+  
   const getColor = (s: number) => {
     if (s >= 75) return '#28a745'
     if (s >= 50) return '#ffc107'
@@ -369,14 +514,14 @@ function ScoreCard({ title, score, description }: { title: string; score: number
     <div style={{
       padding: '1.5rem',
       backgroundColor: '#fff',
-      border: `3px solid ${getColor(score)}`,
+      border: `3px solid ${getColor(safeScore)}`,
       borderRadius: '8px'
     }}>
       <div style={{ fontSize: '0.9rem', opacity: 0.7, marginBottom: '0.5rem' }}>
         {title}
       </div>
-      <div style={{ fontSize: '2rem', fontWeight: 'bold', color: getColor(score) }}>
-        {score.toFixed(0)}
+      <div style={{ fontSize: '2rem', fontWeight: 'bold', color: getColor(safeScore) }}>
+        {safeScore.toFixed(0)}
       </div>
       <div style={{ fontSize: '0.85rem', opacity: 0.6, marginTop: '0.5rem' }}>
         {description}

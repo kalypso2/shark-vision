@@ -1,0 +1,47 @@
+{
+  "session_id": "session_1762668582978",
+  "analysis": {
+    "session_id": "session_1762668582978",
+    "session_meta": {
+      "duration_seconds": 1.13108,
+      "total_frames": 1,
+      "fps": 0.8841107613961876,
+      "landmarks_per_frame": 543,
+      "total_landmarks_processed": 543
+    },
+    "aggregates": {},
+    "timeline": [],
+    "debug": {
+      "metrics_count": 0,
+      "events_count": 0,
+      "detailed_report": {
+        "session_id": "session_1762668582978",
+        "total_frames": 0,
+        "engagement_analysis": {
+          "error": "No engagement data recorded"
+        },
+        "problem_periods": [],
+        "score_factors": {
+          "engagement": {
+            "error": "No engagement data"
+          },
+          "posture": {
+            "error": "No posture data"
+          }
+        },
+        "scoring_breakdown": {
+          "posture": [],
+          "engagement": [],
+          "gesture": [],
+          "gaze": [],
+          "facial": []
+        },
+        "recommendations": []
+      },
+      "debug_file": "../storage/debug/session_1762668582978_debug.json"
+    },
+    "video_path": "/Users/samebaugh/shark-vision/backend/storage/session_1762668582978.mp4"
+  },
+  "coaching": "**Analysis Complete**\n\nYour presentation has been analyzed with 543 landmarks per frame.\n\n**Scores:**\n- Posture: 0/100\n- Eye Contact: 0/100\n- Gesture Quality: 0/100\n- Engagement: 0/100\n\nTo receive AI-powered coaching feedback, please set your GEMINI_API_KEY environment variable.\n",
+  "slide_analysis": null
+}

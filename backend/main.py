@@ -18,11 +18,14 @@ from body_language.detector import HolisticDetector
 from body_language.analyzer import BodyLanguageAnalyzer
 from rag.context_builder import build_context, format_context_for_prompt
 from api.coaching import generate_coaching
+from api.slide_analysis import router as slide_router
+from slide_analyzer import get_slide_analyzer
 from utils.frame_processor import FrameProcessor
 from utils.storage import StorageManager
 from utils.video_recorder import VideoRecorder
 from fastapi.responses import FileResponse
 from pathlib import Path as FilePath
+import base64
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -34,11 +37,33 @@ load_dotenv(ROOT_DIR / ".env")
 load_dotenv(ROOT_DIR.parent / ".env")
 load_dotenv(ROOT_DIR.parent / ".env.local")
 
-# Initialize FastAPI
+# Initialize components (before lifespan uses them)
+detector = HolisticDetector()
+storage = StorageManager()
+
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app_instance: FastAPI):
+    """Manage application lifespan (startup and shutdown)"""
+    # Startup
+    logger.info("🦈 Shark Vision Python Backend Starting...")
+    logger.info("📊 MediaPipe Holistic: 543 landmarks (pose + face + hands)")
+    logger.info("🧠 RAG System: Research-backed coaching")
+    await detector.initialize()
+    logger.info("✅ Backend ready!")
+    
+    yield
+    
+    # Shutdown
+    logger.info("👋 Shutting down Shark Vision Backend...")
+
+# Initialize FastAPI with lifespan
 app = FastAPI(
     title="Shark Vision API",
     description="Real-time body language analysis with MediaPipe Holistic + RAG",
-    version="2.0.0"
+    version="2.0.0",
+    lifespan=lifespan
 )
 
 # CORS middleware for Next.js frontend
@@ -50,18 +75,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize components
-detector = HolisticDetector()
-storage = StorageManager()
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize components on startup"""
-    logger.info("🦈 Shark Vision Python Backend Starting...")
-    logger.info("📊 MediaPipe Holistic: 543 landmarks (pose + face + hands)")
-    logger.info("🧠 RAG System: Research-backed coaching")
-    await detector.initialize()
-    logger.info("✅ Backend ready!")
+# Include slide analysis router
+app.include_router(slide_router)
 
 @app.get("/")
 async def root():
@@ -118,6 +133,12 @@ async def analyze_stream(websocket: WebSocket):
     analyzer = BodyLanguageAnalyzer(session_id)
     frame_processor = FrameProcessor()
     video_recorder = VideoRecorder(session_id, fps=10)
+    slide_analyzer_instance = get_slide_analyzer()  # Get slide analyzer
+    
+    # Slide analysis tracking (analyze every 3 seconds)
+    slide_analyses = []
+    slide_analysis_interval = 3.0  # seconds
+    last_slide_analysis_time = -slide_analysis_interval  # ensure immediate first capture
     
     frame_count = 0
     start_time = datetime.now()
@@ -151,6 +172,36 @@ async def analyze_stream(websocket: WebSocket):
             
             # Calculate current time
             elapsed = (datetime.now() - start_time).total_seconds()
+            
+            # Analyze slide content (every 3 seconds if Gemini is configured)
+            if slide_analyzer_instance.is_configured() and (elapsed - last_slide_analysis_time >= slide_analysis_interval):
+                try:
+                    # Encode frame as JPEG base64
+                    import cv2
+                    _, buffer = cv2.imencode('.jpg', frame)
+                    jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+                    data_url = f"data:image/jpeg;base64,{jpg_as_text}"
+                    
+                    # Analyze slide
+                    slide_result = slide_analyzer_instance.analyze_frame(data_url)
+                    if slide_result.get('success'):
+                        # Format timestamp as MM:SS
+                        mins = int(elapsed // 60)
+                        secs = int(elapsed % 60)
+                        timestamp_formatted = f"{mins}:{secs:02d}"
+                        
+                        slide_analyses.append({
+                            'timestamp': elapsed,
+                            'timestamp_formatted': timestamp_formatted,
+                            'overall_score': slide_result.get('overall_score', 0),
+                            'summary': slide_result.get('summary', ''),
+                            'issues': slide_result.get('issues', [])
+                        })
+                        logger.info(f"📊 Slide analyzed at {timestamp_formatted}: Score {slide_result.get('overall_score')}/10")
+                    
+                    last_slide_analysis_time = elapsed
+                except Exception as e:
+                    logger.error(f"Error analyzing slide: {e}")
             
             # Analyze landmarks
             metrics = analyzer.calculate_metrics(landmarks, elapsed)
@@ -228,9 +279,24 @@ async def analyze_stream(websocket: WebSocket):
                 "video_path": video_path
             }
         
+    # Aggregate slide analysis data
+    slide_analysis_summary = None
+    if slide_analyses:
+        total_score = sum(s['overall_score'] for s in slide_analyses)
+        avg_score = total_score / len(slide_analyses) if slide_analyses else 0
+        total_issues = sum(len(s['issues']) for s in slide_analyses)
+        
+        slide_analysis_summary = {
+            'frames_analyzed': len(slide_analyses),
+            'average_score': avg_score,
+            'total_issues': total_issues,
+            'timestamped_issues': slide_analyses
+        }
+        logger.info(f"📊 Slide analysis summary: {len(slide_analyses)} frames, avg score {avg_score:.1f}/10, {total_issues} issues")
+    
     # Save immediately so frontend can find the session while coaching generates
     logger.info("💾 Saving session (initial, coaching pending)...")
-    saved = storage.save_analysis(session_id, analysis, coaching="")
+    saved = storage.save_analysis(session_id, analysis, coaching="", slide_analysis=slide_analysis_summary)
     if not saved:
         logger.error("❌ Failed to save initial session JSON")
     else:
@@ -246,7 +312,7 @@ async def analyze_stream(websocket: WebSocket):
             coaching_text = await generate_coaching(analysis, context_prompt)
             
             logger.info("💾 Updating session with coaching...")
-            storage.save_analysis(session_id, analysis, coaching_text)
+            storage.save_analysis(session_id, analysis, coaching_text, slide_analysis=slide_analysis_summary)
             logger.info("✅ Coaching saved")
         except Exception as e:
             logger.error(f"❌ Coaching generation failed: {e}", exc_info=True)

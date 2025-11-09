@@ -1,0 +1,47 @@
+{
+  "session_id": "session_1762666001805",
+  "analysis": {
+    "session_id": "session_1762666001805",
+    "session_meta": {
+      "duration_seconds": 0.519572,
+      "total_frames": 1,
+      "fps": 1.9246610671860684,
+      "landmarks_per_frame": 543,
+      "total_landmarks_processed": 543
+    },
+    "aggregates": {},
+    "timeline": [],
+    "debug": {
+      "metrics_count": 0,
+      "events_count": 0,
+      "detailed_report": {
+        "session_id": "session_1762666001805",
+        "total_frames": 0,
+        "engagement_analysis": {
+          "error": "No engagement data recorded"
+        },
+        "problem_periods": [],
+        "score_factors": {
+          "engagement": {
+            "error": "No engagement data"
+          },
+          "posture": {
+            "error": "No posture data"
+          }
+        },
+        "scoring_breakdown": {
+          "posture": [],
+          "engagement": [],
+          "gesture": [],
+          "gaze": [],
+          "facial": []
+        },
+        "recommendations": []
+      },
+      "debug_file": "../storage/debug/session_1762666001805_debug.json"
+    },
+    "video_path": "/Users/samebaugh/shark-vision/backend/storage/session_1762666001805.mp4"
+  },
+  "coaching": "Okay, based on the limited data provided, here's a tailored analysis:\n\n**Strengths:**\n\n1.  With only 1 frame analyzed and all scores at zero, there are no strengths identified in this session. Further analysis of more frames is required to identify strengths.\n\n**Areas to Improve:**\n\n1.  **Posture:** A posture score of 0/100 indicates a significant need for improvement. Research suggests that an upright posture conveys confidence and competence (Mehrabian, 1981). More data is required to see the posture but focus on aligning ears, shoulders, and hips.\n\n2.  **Eye Contact:**  The eye contact score of 0/100 is a major concern.  Effective eye contact is crucial for establishing rapport and credibility with the audience. Studies show speakers who maintain consistent eye contact are perceived as more trustworthy (Kleinke, 1986).\n\n3.  **Gesture Quality & Frequency:** With no gesture frequency recorded and a quality score of zero, the presenter is likely not using gestures effectively. Research indicates that gestures enhance audience comprehension and recall (Hostetter, 2011).\n\n**Evidence-Based Technique:**\n\nTo improve eye contact, practice the \"Triangle Technique.\" Divide the audience into three zones (left, center, right). Focus on one zone for a few seconds before moving to the next. This creates the illusion of connecting with each individual while reducing the pressure of direct, sustained eye contact (Kleinke, 1986).\n",
+  "slide_analysis": null
+}

@@ -44,7 +44,7 @@ async def generate_coaching(analysis: Dict, rag_context: str) -> str:
         prompt = _build_coaching_prompt(analysis, rag_context)
         
         # Generate with Gemini
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         response = model.generate_content(prompt)
         
         return response.text

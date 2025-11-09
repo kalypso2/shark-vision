@@ -1,261 +1,257 @@
-# Shark Vision - AI Presentation Coach
+# 🎯 Shark Vision - Unified Presentation Analysis System
 
-An AI-powered presentation grading system with real-time body language analysis.
+**Real-time body language analysis + AI-powered slide content evaluation**
 
-## Features
+Combining MediaPipe Holistic (543 landmarks) with Gemini AI to provide comprehensive presentation feedback.
 
-### Current (Body Language Analysis)
+## ✨ Key Features
 
-- ✅ Real-time pose detection using TensorFlow.js MoveNet
-- ✅ Posture quality analysis
-- ✅ Hand gesture and movement tracking
-- ✅ Eye contact proxy (gaze direction)
-- ✅ Engagement scoring
-- ✅ Fidgeting detection
-- ✅ Video recording with WebRTC
-- ✅ Comprehensive analysis results with timeline
-- ✅ Client-side processing (no data sent to external servers)
+### 🎥 Body Language Analysis (Real-time)
+- **543-landmark tracking** - Pose, face, and hand detection
+- **Live status indicators** - Instant feedback on posture, eye contact, gestures
+- **Facial expression analysis** - Smile detection, eyebrow raise, engagement
+- **Video recording** - Saves presentation with timestamped events
+- **AI coaching** - Research-backed feedback via RAG system
 
-### Future Roadmap
+### 📊 Slide Content Analysis (Gemini AI)
+- **Text clarity** - 6x6 rule compliance, readability, font size
+- **Visual design** - Color contrast (4.5:1), hierarchy, whitespace
+- **Content quality** - Message clarity, audience appropriateness
+- **Overall impact** - Professionalism rating (0-10 scale)
+- **Actionable suggestions** - Specific improvements for each issue
 
-- 🔲 Audio/speech analysis
-- 🔲 Slide change detection
-- 🔲 LLM-based coaching feedback
-- 🔲 Multi-session comparison
-- 🔲 Export presentation reports
-
-## Tech Stack
-
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **AI/ML:** TensorFlow.js, MoveNet Lightning
-- **Video:** WebRTC, MediaRecorder API
-- **Styling:** CSS-in-JS (inline styles)
-- **Storage:** Local filesystem (future: cloud storage)
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
+- Node.js 18+
+- Python 3.10+
+- Webcam
+- [Gemini API key](https://makersuite.google.com/app/apikey)
 
-- Node.js 18+ installed
-- Modern browser with WebRTC support (Chrome recommended)
-- Webcam access
+### 1. Backend Setup (Python)
 
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd shark-vision
+cd backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure API key
+echo "GEMINI_API_KEY=your_key_here" > .env
+
+# Start server
+python main.py
+# Runs on http://localhost:8000
 ```
 
-2. Install dependencies:
+### 2. Frontend Setup (Next.js)
+
 ```bash
+# Install dependencies
 npm install
-```
 
-3. Start the development server:
-```bash
+# Start dev server
 npm run dev
+# Runs on http://localhost:3000
 ```
 
-4. Open http://localhost:3000 in your browser
+### 3. Run Integration Tests
 
-## Project Structure
+```bash
+cd backend
+source venv/bin/activate
+python test_integration.py
+
+# Expected output:
+# ✅ PASS  Slide Analyzer
+# ✅ PASS  Body Language
+# ✅ PASS  Combined Analysis
+# ✅ PASS  API Imports
+```
+
+## 📖 Usage
+
+1. Navigate to http://localhost:3000
+2. Click **"Presentation Analysis"**
+3. Grant camera permissions
+4. Click **"Start Analysis"**
+5. Present for 10-30 seconds
+6. Click **"Stop Analysis"**
+7. View comprehensive results!
+
+## 🏗️ Architecture
 
 ```
-shark-vision/
-├── app/
+Shark Vision/
+├── app/                        # Next.js frontend
+│   ├── page.tsx               # Landing page
+│   ├── analysis-python/       # Analysis UI
+│   └── results-python/        # Results display
+├── backend/
+│   ├── main.py                # FastAPI server
+│   ├── slide_analyzer.py      # NEW: Gemini slide analysis
+│   ├── body_language/         # MediaPipe analysis
+│   │   ├── detector.py        # 543-landmark detection
+│   │   ├── analyzer.py        # Metric calculation
+│   │   └── debug_logger.py    # Detailed diagnostics
 │   ├── api/
-│   │   └── presentations/        # API routes for upload/retrieval
-│   ├── analysis/                 # Recording page
-│   ├── results/[sessionId]/      # Results page
-│   ├── layout.tsx                # Root layout
-│   ├── page.tsx                  # Home page
-│   └── globals.css               # Global styles
-│
-├── components/
-│   ├── PresentationRecorder.tsx  # Main recording component
-│   ├── BodyLanguageVisualizer.tsx # Skeleton overlay
-│   └── AnalysisResults.tsx       # Results display
-│
-├── lib/
-│   ├── body_language/
-│   │   ├── analyzer.ts           # Main orchestrator
-│   │   ├── pose_detector.ts      # TensorFlow.js wrapper
-│   │   ├── event_detector.ts     # Rule-based detection
-│   │   ├── metrics.ts            # Metric calculations
-│   │   └── types.ts              # TypeScript interfaces
-│   ├── video_recorder.ts         # MediaRecorder wrapper
-│   └── storage.ts                # File system utilities
-│
-└── storage/                      # Git-ignored
-    └── presentations/
-        └── [sessionId]/
-            ├── video.webm
-            └── analysis.json
+│   │   ├── coaching.py        # RAG-based feedback
+│   │   └── slide_analysis.py  # NEW: Slide endpoints
+│   └── rag/                   # Research knowledge base
+└── lib/
+    └── websocket_client.ts    # Real-time connection
 ```
 
-## Usage
+## 🔌 API Endpoints
 
-### Recording a Presentation
+### Body Language (WebSocket)
+```javascript
+// Connect
+const ws = new WebSocket('ws://localhost:8000/ws/analyze');
 
-1. Navigate to `/analysis`
-2. Click "Start Webcam" and grant permissions
-3. Click "Start Recording"
-4. Present naturally for 1-5 minutes
-5. Click "Stop Recording"
-6. Wait for processing (~10 seconds per minute of video)
-7. View results with aggregate scores and timeline
+// Send frame
+ws.send(JSON.stringify({
+  frame: "base64_jpeg",
+  timestamp: 1.5
+}));
 
-### Understanding Results
-
-**Aggregate Scores (0-100):**
-- **Posture Score:** Time spent in good posture vs slouching
-- **Eye Contact Proxy:** Time spent looking at camera vs away
-- **Engagement Score:** Dynamic vs static movement periods
-- **Gesture Quality:** Symmetric, natural gestures score higher
-
-**Timeline Events:**
-- **Posture:** `good_posture`, `slouched`
-- **Gesture:** `symmetric_gesture`, `asymmetric_gesture`, `fidgeting`
-- **Gaze:** `looked_away` (with direction)
-- **Movement:** `static_period`, `dynamic_period`
-
-## Configuration
-
-### Detection Thresholds
-
-Adjust in `lib/body_language/metrics.ts`:
-
-```typescript
-export const THRESHOLDS = {
-  GOOD_POSTURE: 0.15,        // ~8.5 degrees from vertical
-  SLOUCH: 0.35,              // ~20 degrees (triggers slouch)
-  GESTURE: 0.08,             // 8% of frame height
-  FIDGET: 0.02,              // Small movements
-  LOOKING_AWAY: 0.25,        // 25% offset from center
-  STATIC_MOVEMENT: 0.01,     // Very still
-  DYNAMIC_MOVEMENT: 0.05,    // Animated
+// Receive live updates
+{
+  "live_status": {
+    "posture": "good",
+    "eye_contact": "forward",
+    "gesture": "active",
+    "smile": 0.85,
+    "engagement": "engaged"
+  }
 }
 ```
 
-### Frame Processing
-
-Adjust in `lib/body_language/analyzer.ts`:
-
-```typescript
-private readonly TARGET_FPS = 10  // Process 10 frames/second
-```
-
-### Video Quality
-
-Adjust in `lib/video_recorder.ts`:
-
-```typescript
-videoBitsPerSecond: 2500000  // 2.5 Mbps
-```
-
-## Testing
-
-See [TESTING_GUIDE.md](./TESTING_GUIDE.md) for comprehensive testing instructions.
-
-Quick test:
+### Slide Analysis (REST)
 ```bash
+# Analyze a slide
+curl -X POST http://localhost:8000/api/slide/analyze-frame \
+  -F "image=@slide.jpg" \
+  -F "timestamp=3.0"
+
+# Response
+{
+  "overall_score": 7,
+  "issues": [{
+    "category": "Text Clarity",
+    "issue": "Too much text",
+    "severity": "high",
+    "suggestion": "Apply 6x6 rule"
+  }],
+  "summary": "Slide is readable but overcrowded..."
+}
+```
+
+## 📊 Output
+
+### Body Language Metrics
+- **Posture Score** (0-100): % of time with good posture
+- **Eye Contact** (0-100): % of time looking forward
+- **Gesture Quality** (0-100): % of time gesturing well
+- **Smile Score** (0-100): % of time smiling
+- **Engagement** (0-100): % of time engaged
+
+### Slide Metrics
+- **Overall Score** (0-10): Professional quality rating
+- **Issues by Category**: Text, Design, Content, Impact
+- **Severity Levels**: Critical, High, Medium, Low
+- **Timestamped**: Each issue linked to exact moment
+
+### Combined Report
+- Video playback with synchronized timeline
+- Timestamped body language events
+- Timestamped slide issues
+- AI coaching incorporating both analyses
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+cd backend
+source venv/bin/activate
+python test_integration.py
+
+# Test specific systems
+python -m pytest test_metrics.py  # Body language
+curl http://localhost:8000/api/slide/health  # Slide analysis
+```
+
+## 📚 Documentation
+
+- **[INTEGRATION_COMPLETE.md](INTEGRATION_COMPLETE.md)** - Full integration guide
+- **[backend/README.md](backend/README.md)** - Python backend docs
+- **API Documentation**: http://localhost:8000/docs (when running)
+
+## 🎓 How It Works
+
+### Body Language Pipeline
+1. **Capture** - WebSocket receives webcam frames
+2. **Detect** - MediaPipe extracts 543 landmarks
+3. **Analyze** - Calculate metrics (posture, gaze, gestures)
+4. **Record** - Save video with CV2
+5. **Coach** - Generate feedback using RAG + Gemini
+
+### Slide Analysis Pipeline
+1. **Upload** - Send slide image via REST API
+2. **Process** - Gemini analyzes visual and textual content
+3. **Evaluate** - Score across 4 categories
+4. **Suggest** - Provide specific improvement recommendations
+5. **Track** - Link issues to presentation timeline
+
+## 🛠️ Development
+
+```bash
+# Frontend development
 npm run dev
-# Navigate to http://localhost:3000/analysis
-# Record a 30-second test presentation
-# Verify results display correctly
+
+# Backend development (auto-reload)
+cd backend
+source venv/bin/activate
+uvicorn main:app --reload
+
+# Lint Python code
+black backend/
 ```
 
-## Performance
+## 📦 Dependencies
 
-- **Frame Processing:** ~10 FPS (100ms per frame)
-- **Memory Usage:** ~1-2 MB landmark data per 10 minutes
-- **Video Size:** ~15-20 MB per 10 minutes at 2.5 Mbps
-- **Browser Support:** Chrome (best), Firefox, Safari, Edge
+### Backend
+- `fastapi` - Web framework
+- `mediapipe` - Body language detection
+- `google-generativeai` - Slide + coaching AI
+- `opencv-python` - Video processing
+- `websockets` - Real-time streaming
 
-## Future Integration Points
+### Frontend
+- `next` - React framework
+- `typescript` - Type safety
+- `react` - UI library
 
-### Audio Analysis
-```typescript
-// lib/audio_analyzer.ts
-export function analyzeAudio(audioBlob: Blob): AudioAnalysis {
-  // Detect speech rate, pauses, filler words
-  return { timeline, aggregates }
-}
-```
+## 🤝 Contributing
 
-### Slide Detection
-```typescript
-// lib/slide_detector.ts
-export function detectSlideChanges(videoFrames: ImageData[]): SlideEvent[] {
-  // Compare frames, detect transitions
-  return slideChanges
-}
-```
+This is a unified system combining:
+- **Sam's work**: Body language analysis (sam branch)
+- **Kyle's work**: Slide content analysis (main branch)
 
-### LLM Coaching
-```typescript
-// app/api/coaching/route.ts
-export async function POST(analysis: BodyLanguageAnalysis) {
-  // Send to GPT-4, get feedback
-  return { strengths, improvements, score }
-}
-```
-
-## Troubleshooting
-
-### Model fails to load
-- Check browser console for TensorFlow.js errors
-- Ensure WebGL is enabled in browser
-- Try Chrome for best compatibility
-
-### Poor detection accuracy
-- Ensure good lighting
-- Position camera to show upper body clearly
-- Sit 2-3 feet from camera
-- Check `keypoint_detection_rate` in debug info
-
-### Video upload fails
-- Verify storage directory exists and is writable
-- Check file size limits in API routes
-- Review browser console for errors
-
-## Contributing
-
-This is currently a solo development project. Future contributions guidelines will be added.
-
-## License
+## 📄 License
 
 MIT
 
-## Architecture Notes
+## 🙏 Acknowledgments
 
-### Why Client-Side Processing?
+- MediaPipe team for landmark detection
+- Google for Gemini AI
+- Research papers cited in `backend/rag/knowledge_base.py`
 
-1. **Privacy:** Video never leaves the user's device during analysis
-2. **Speed:** No network latency for video upload
-3. **Cost:** No server compute costs for ML inference
-4. **Scalability:** Processing scales with users' devices
+---
 
-### Why MoveNet Lightning?
-
-1. **Performance:** Runs at 30+ FPS in browser
-2. **Accuracy:** Optimized for single-person detection
-3. **Size:** Lightweight model (~6 MB)
-4. **Browser Support:** Works with TensorFlow.js WebGL backend
-
-### Design Decisions
-
-- **Rule-based detection** over ML: Easier to understand, tune, and debug
-- **Event timeline** over frame-by-frame: More actionable feedback
-- **Aggregate scores**: Provides high-level overview
-- **Local storage**: Simple, no database setup required
-- **Modular architecture**: Easy to add audio/slide analysis later
-
-## Acknowledgments
-
-- TensorFlow.js team for MoveNet model
-- Next.js team for excellent framework
-- Google MediaPipe for pose detection research
+**Status**: ✅ Fully Integrated | **Version**: 2.0.0 | **Last Updated**: 2025-11-09

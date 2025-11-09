@@ -205,7 +205,7 @@ export class AnalysisWebSocketClient {
   /**
    * Start streaming video frames to backend
    */
-  startStreaming(fps: number = 10) {
+  async startStreaming(fps: number = 10): Promise<void> {
     if (!this.videoElement || !this.canvasElement || !this.ctx) {
       throw new Error('Video element not set. Call setVideoElement() first.')
     }
@@ -213,6 +213,8 @@ export class AnalysisWebSocketClient {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       throw new Error('WebSocket not connected. Call connect() first.')
     }
+
+    await this.ensureVideoReady()
 
     this.streaming = true
     const intervalMs = 1000 / fps
@@ -222,21 +224,46 @@ export class AnalysisWebSocketClient {
         return
       }
 
-      // Set canvas size to video size
-      if (this.canvasElement.width !== this.videoElement.videoWidth) {
-        this.canvasElement.width = this.videoElement.videoWidth
-        this.canvasElement.height = this.videoElement.videoHeight
+      const width =
+        this.videoElement.videoWidth ||
+        this.videoElement.clientWidth ||
+        this.videoElement.getBoundingClientRect().width ||
+        640
+      const height =
+        this.videoElement.videoHeight ||
+        this.videoElement.clientHeight ||
+        this.videoElement.getBoundingClientRect().height ||
+        480
+
+      if (width === 0 || height === 0) {
+        return
+      }
+
+      if (this.canvasElement.width !== width || this.canvasElement.height !== height) {
+        this.canvasElement.width = width
+        this.canvasElement.height = height
       }
 
       // Draw current video frame to canvas
-      this.ctx.drawImage(this.videoElement, 0, 0)
+      this.ctx.drawImage(this.videoElement, 0, 0, width, height)
 
       // Convert to JPEG and send
       this.canvasElement.toBlob(
         (blob) => {
-          if (blob && this.ws?.readyState === WebSocket.OPEN) {
-            this.ws.send(blob)
+          if (!blob || this.ws?.readyState !== WebSocket.OPEN) {
+            return
           }
+
+          blob
+            .arrayBuffer()
+            .then((buffer) => {
+              if (this.ws?.readyState === WebSocket.OPEN) {
+                this.ws.send(buffer)
+              }
+            })
+            .catch((error) => {
+              console.error('Error converting frame blob:', error)
+            })
         },
         'image/jpeg',
         0.8 // Quality: 80%
@@ -255,6 +282,48 @@ export class AnalysisWebSocketClient {
       clearInterval(this.streamInterval)
       this.streamInterval = null
     }
+  }
+
+  private ensureVideoReady(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.videoElement) {
+        resolve()
+        return
+      }
+
+      const isReady =
+        this.videoElement.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+        this.videoElement.videoWidth > 0 &&
+        this.videoElement.videoHeight > 0
+
+      if (isReady) {
+        resolve()
+        return
+      }
+
+      const onReady = () => {
+        cleanup()
+        resolve()
+      }
+
+      const cleanup = () => {
+        this.videoElement?.removeEventListener('loadedmetadata', onReady)
+        this.videoElement?.removeEventListener('canplay', onReady)
+        clearTimeout(timeout)
+      }
+
+      const timeout = setTimeout(() => {
+        cleanup()
+        resolve()
+      }, 2000)
+
+      this.videoElement.addEventListener('loadedmetadata', onReady)
+      this.videoElement.addEventListener('canplay', onReady)
+
+      this.videoElement.play().catch(() => {
+        // Autoplay may be blocked; ignore
+      })
+    })
   }
 
   /**

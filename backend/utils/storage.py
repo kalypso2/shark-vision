@@ -25,7 +25,7 @@ class StorageManager:
         self.analysis_path.mkdir(parents=True, exist_ok=True)
         self.videos_path.mkdir(parents=True, exist_ok=True)
     
-    def save_analysis(self, session_id: str, analysis: Dict, coaching: str) -> bool:
+    def save_analysis(self, session_id: str, analysis: Dict, coaching: str, slide_analysis: Optional[Dict] = None) -> bool:
         """
         Save analysis and coaching to disk
         
@@ -33,16 +33,18 @@ class StorageManager:
             session_id: Unique session identifier
             analysis: Full analysis dict
             coaching: Coaching feedback string
+            slide_analysis: Optional slide content analysis data
         
         Returns:
             True if successful
         """
         try:
-            # Combine analysis and coaching
+            # Combine analysis, coaching, and slide analysis
             data = self._sanitize({
                 'session_id': session_id,
                 'analysis': analysis,
-                'coaching': coaching
+                'coaching': coaching,
+                'slide_analysis': slide_analysis
             })
             
             # Save atomically: write to temp then replace

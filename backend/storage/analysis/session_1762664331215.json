@@ -1,0 +1,1379 @@
+{
+  "session_id": "session_1762664331215",
+  "analysis": {
+    "session_id": "session_1762664331215",
+    "session_meta": {
+      "duration_seconds": 4.940915,
+      "total_frames": 22,
+      "fps": 4.452616570007781,
+      "landmarks_per_frame": 543,
+      "total_landmarks_processed": 11946
+    },
+    "aggregates": {
+      "posture_score": 0.0,
+      "eye_contact_proxy": 95.45454545454545,
+      "gesture_quality": 22.727272727272727,
+      "smile_score": 100.0,
+      "engagement_score": 18.181818181818183,
+      "gesture_frequency": 12.14349973638486
+    },
+    "timeline": [
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 1.204224,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 1.204224,
+        "confidence": 0.5998812615871429
+      },
+      {
+        "type": "gaze",
+        "subtype": "looking_away",
+        "timestamp": 1.204224,
+        "direction": "forward"
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 1.504744,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 1.504744,
+        "confidence": 0.5784034729003906
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 1.66417,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 1.66417,
+        "confidence": 0.5692474544048309
+      },
+      {
+        "type": "gesture",
+        "subtype": "hand_movement",
+        "timestamp": 1.66417,
+        "symmetry": 0.6772052295900786,
+        "shapes": {}
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 1.803697,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 1.803697,
+        "confidence": 0.5902841687202454
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 1.942469,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 1.942469,
+        "confidence": 0.5227759480476379
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 2.079225,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 2.079225,
+        "confidence": 0.5079522728919983
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 2.217989,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 2.217989,
+        "confidence": 0.5377903580665588
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 2.35783,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 2.35783,
+        "confidence": 0.5652830004692078
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 2.494748,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 2.494748,
+        "confidence": 0.596579909324646
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 2.631768,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 2.631768,
+        "confidence": 0.5610108375549316
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 2.768825,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 2.768825,
+        "confidence": 0.5197241902351379
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 2.905714,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 2.905714,
+        "confidence": 0.5669787526130676
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 3.042296,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 3.042296,
+        "confidence": 0.5582213401794434
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 3.179776,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 3.179776,
+        "confidence": 0.5653023719787598
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 3.316198,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 3.316198,
+        "confidence": 0.5711078643798828
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 3.453127,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 3.453127,
+        "confidence": 0.5644947290420532
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 3.596421,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 3.596421,
+        "confidence": 0.5941987037658691
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 3.765872,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 3.765872,
+        "confidence": 0.5722776055335999
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 3.908555,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 3.908555,
+        "confidence": 0.5642428994178772
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 4.048127,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 4.048127,
+        "confidence": 0.5689918994903564
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 4.186749,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 4.186749,
+        "confidence": 0.5634918808937073
+      },
+      {
+        "type": "posture",
+        "subtype": "slouching",
+        "timestamp": 4.310722,
+        "confidence": 0.5
+      },
+      {
+        "type": "facial",
+        "subtype": "smiling",
+        "timestamp": 4.310722,
+        "confidence": 0.5229145288467407
+      }
+    ],
+    "debug": {
+      "metrics_count": 22,
+      "events_count": 46,
+      "detailed_report": {
+        "session_id": "session_1762664331215",
+        "total_frames": 22,
+        "engagement_analysis": {
+          "total_frames": 22,
+          "facial_analysis": {
+            "average_score": 23.15667073835026,
+            "smile_average": 0.5618707022883676,
+            "eyebrow_raise_average": 0.02157389846715059,
+            "mouth_movement_average": 0.0011541897600347345,
+            "contributing_to_score": "70% of engagement"
+          },
+          "movement_analysis": {
+            "frame_distribution": {
+              "static": 18,
+              "moderate": 4,
+              "dynamic": 0
+            },
+            "percentages": {
+              "static": 81.81818181818183,
+              "moderate": 18.181818181818183,
+              "dynamic": 0.0
+            },
+            "stats": {
+              "average": 0.0022288394740565486,
+              "max": 0.009759541216583964,
+              "min": 0,
+              "threshold_needed": 0.003,
+              "gap": 0.0007711605259434515
+            },
+            "contributing_to_score": "30% of engagement"
+          },
+          "low_engagement_periods": [],
+          "diagnosis": "LOW ENGAGEMENT: Limited facial expressiveness. Try raising eyebrows when emphasizing points and being more animated."
+        },
+        "problem_periods": [
+          {
+            "type": "poor_posture",
+            "timestamp": 1.204224,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 1.504744,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 1.66417,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 1.803697,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 1.942469,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 2.079225,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 2.217989,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 2.35783,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 2.494748,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 2.631768,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 2.768825,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 2.905714,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 3.042296,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 3.179776,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 3.316198,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 3.453127,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 3.596421,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 3.765872,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 3.908555,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 4.048127,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 4.186749,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          },
+          {
+            "type": "poor_posture",
+            "timestamp": 4.310722,
+            "score": 50.0,
+            "issues": [
+              "Shoulders not level (alignment: 0.00)",
+              "Overall posture below threshold"
+            ]
+          }
+        ],
+        "score_factors": {
+          "engagement": {
+            "frames_that_scored": 0,
+            "frames_that_didnt_score": 22,
+            "percentage_scoring": 0.0,
+            "why_frames_didnt_score": [
+              "1.2s: low engagement",
+              "1.5s: low engagement",
+              "1.7s: low engagement",
+              "1.8s: low engagement",
+              "1.9s: low engagement",
+              "2.1s: low engagement",
+              "2.2s: low engagement",
+              "2.4s: low engagement",
+              "2.5s: low engagement",
+              "2.6s: low engagement"
+            ]
+          },
+          "posture": {
+            "average_score": 50.0,
+            "good_posture_percentage": 0.0,
+            "common_issues": [
+              "Shoulders not level (alignment: 0.00) (22 times)",
+              "Overall posture below threshold (22 times)"
+            ]
+          }
+        },
+        "scoring_breakdown": {
+          "posture": [
+            {
+              "timestamp": 1.204224,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 1.504744,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 1.66417,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 1.803697,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 1.942469,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 2.079225,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 2.217989,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 2.35783,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 2.494748,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 2.631768,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 2.768825,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 2.905714,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 3.042296,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 3.179776,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 3.316198,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 3.453127,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 3.596421,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 3.765872,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 3.908555,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 4.048127,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 4.186749,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            },
+            {
+              "timestamp": 4.310722,
+              "score": 50.0,
+              "is_good": false,
+              "penalties": [
+                "Shoulders not level (alignment: 0.00)",
+                "Overall posture below threshold"
+              ]
+            }
+          ],
+          "engagement": [
+            {
+              "smile": 0.5998812615871429,
+              "eyebrow_raise": 0.04856985807418822,
+              "mouth_open": 0.001360177993774414,
+              "facial_score": 25.493151545524597,
+              "movement_amount": 0,
+              "type": "static",
+              "movement_score": 0.0,
+              "total_score": 17.845206081867218,
+              "timestamp": 1.204224
+            },
+            {
+              "smile": 0.5784034729003906,
+              "eyebrow_raise": 0.045683875679969774,
+              "mouth_open": 0.0011032819747924805,
+              "facial_score": 24.539753645658493,
+              "movement_amount": 0.009759541216583964,
+              "type": "moderate",
+              "movement_score": 100,
+              "total_score": 47.177827551960945,
+              "timestamp": 1.504744
+            },
+            {
+              "smile": 0.5692474544048309,
+              "eyebrow_raise": 0.019955158233642568,
+              "mouth_open": 0.0019347667694091797,
+              "facial_score": 23.42659592628479,
+              "movement_amount": 0.00562504163468094,
+              "type": "moderate",
+              "movement_score": 100,
+              "total_score": 46.39861714839935,
+              "timestamp": 1.66417
+            },
+            {
+              "smile": 0.5902841687202454,
+              "eyebrow_raise": 0.023001328110694875,
+              "mouth_open": 0.0023952126502990723,
+              "facial_score": 24.373262971639633,
+              "movement_amount": 0.003461711157041224,
+              "type": "moderate",
+              "movement_score": 100,
+              "total_score": 47.06128408014774,
+              "timestamp": 1.803697
+            },
+            {
+              "smile": 0.5227759480476379,
+              "eyebrow_raise": 0.043221831321716295,
+              "mouth_open": 0.0023418664932250977,
+              "facial_score": 22.27794885635376,
+              "movement_amount": 0.0017066736743169594,
+              "type": "static",
+              "movement_score": 56.88912247723198,
+              "total_score": 32.661300942617224,
+              "timestamp": 1.942469
+            },
+            {
+              "smile": 0.5079522728919983,
+              "eyebrow_raise": 0.039449229836463914,
+              "mouth_open": 0.0016814470291137695,
+              "facial_score": 21.552011221647263,
+              "movement_amount": 0.0013246422524198051,
+              "type": "static",
+              "movement_score": 44.15474174732684,
+              "total_score": 28.332830379351133,
+              "timestamp": 2.079225
+            },
+            {
+              "smile": 0.5377903580665588,
+              "eyebrow_raise": 0.023192808032035817,
+              "mouth_open": 0.000553429126739502,
+              "facial_score": 22.224001437425613,
+              "movement_amount": 0.002606912853978895,
+              "type": "static",
+              "movement_score": 86.89709513262983,
+              "total_score": 41.62592954598688,
+              "timestamp": 2.217989
+            },
+            {
+              "smile": 0.5652830004692078,
+              "eyebrow_raise": 0.012814894318580617,
+              "mouth_open": 0.0012114644050598145,
+              "facial_score": 23.032110780477524,
+              "movement_amount": 0.0016509365620522832,
+              "type": "static",
+              "movement_score": 55.0312187350761,
+              "total_score": 32.631843166857095,
+              "timestamp": 2.35783
+            },
+            {
+              "smile": 0.596579909324646,
+              "eyebrow_raise": 0.01717422902584075,
+              "mouth_open": 0.0008723139762878418,
+              "facial_score": 24.404592663049698,
+              "movement_amount": 0.0010338131397244267,
+              "type": "static",
+              "movement_score": 34.46043799081422,
+              "total_score": 27.421346261379057,
+              "timestamp": 2.494748
+            },
+            {
+              "smile": 0.5610108375549316,
+              "eyebrow_raise": 0.01445886492729186,
+              "mouth_open": 0.0011387467384338379,
+              "facial_score": 22.908361852169037,
+              "movement_amount": 0.0007165569162413453,
+              "type": "static",
+              "movement_score": 23.885230541378178,
+              "total_score": 23.20142245893178,
+              "timestamp": 2.631768
+            },
+            {
+              "smile": 0.5197241902351379,
+              "eyebrow_raise": 0.010404258966445912,
+              "mouth_open": 0.000928342342376709,
+              "facial_score": 21.128945648670197,
+              "movement_amount": 0.0008221926833356793,
+              "type": "static",
+              "movement_score": 27.406422777855976,
+              "total_score": 23.012188787425927,
+              "timestamp": 2.768825
+            },
+            {
+              "smile": 0.5669787526130676,
+              "eyebrow_raise": 0.02106231451034545,
+              "mouth_open": 0.0015792250633239746,
+              "facial_score": 23.358396291732788,
+              "movement_amount": 0.0008751164989350222,
+              "type": "static",
+              "movement_score": 29.17054996450074,
+              "total_score": 25.102042393563174,
+              "timestamp": 2.905714
+            },
+            {
+              "smile": 0.5582213401794434,
+              "eyebrow_raise": 0.024675101041793813,
+              "mouth_open": 0.0004342198371887207,
+              "facial_score": 23.08213323354721,
+              "movement_amount": 0.002238040024465911,
+              "type": "static",
+              "movement_score": 74.6013341488637,
+              "total_score": 38.53789350814216,
+              "timestamp": 3.042296
+            },
+            {
+              "smile": 0.5653023719787598,
+              "eyebrow_raise": 0.011984527111053456,
+              "mouth_open": 0.000444948673248291,
+              "facial_score": 22.984979152679443,
+              "movement_amount": 0.0023472354485237676,
+              "type": "static",
+              "movement_score": 78.24118161745892,
+              "total_score": 39.561839892113284,
+              "timestamp": 3.179776
+            },
+            {
+              "smile": 0.5711078643798828,
+              "eyebrow_raise": 0.009591028094291677,
+              "mouth_open": 0.0009015202522277832,
+              "facial_score": 23.159091025590897,
+              "movement_amount": 0.0008230157820010714,
+              "type": "static",
+              "movement_score": 27.433859400035715,
+              "total_score": 24.44152153792434,
+              "timestamp": 3.316198
+            },
+            {
+              "smile": 0.5644947290420532,
+              "eyebrow_raise": 0.009119033813476552,
+              "mouth_open": 0.0007787346839904785,
+              "facial_score": 22.87672221660614,
+              "movement_amount": 0.0005250967648961712,
+              "type": "static",
+              "movement_score": 17.50322549653904,
+              "total_score": 21.26467320058601,
+              "timestamp": 3.453127
+            },
+            {
+              "smile": 0.5941987037658691,
+              "eyebrow_raise": 0.006906583905220021,
+              "mouth_open": 0.0016796588897705078,
+              "facial_score": 24.025535434484482,
+              "movement_amount": 0.0029640862828991,
+              "type": "static",
+              "movement_score": 98.80287609663667,
+              "total_score": 46.458737633130134,
+              "timestamp": 3.596421
+            },
+            {
+              "smile": 0.5722776055335999,
+              "eyebrow_raise": 0.02599012851715087,
+              "mouth_open": 0.0011360645294189453,
+              "facial_score": 23.70489001274109,
+              "movement_amount": 0.0012115836221193864,
+              "type": "static",
+              "movement_score": 40.38612073731288,
+              "total_score": 28.709259230112625,
+              "timestamp": 3.765872
+            },
+            {
+              "smile": 0.5642428994178772,
+              "eyebrow_raise": 0.01714293658733367,
+              "mouth_open": 0.0008144974708557129,
+              "facial_score": 23.10843899846077,
+              "movement_amount": 0.001263653141537149,
+              "type": "static",
+              "movement_score": 42.12177138457163,
+              "total_score": 28.812438714294025,
+              "timestamp": 3.908555
+            },
+            {
+              "smile": 0.5689918994903564,
+              "eyebrow_raise": 0.012712076306343068,
+              "mouth_open": 0.0007718801498413086,
+              "facial_score": 23.16419467329979,
+              "movement_amount": 0.0009527235951300882,
+              "type": "static",
+              "movement_score": 31.757453171002936,
+              "total_score": 25.742172222610733,
+              "timestamp": 4.048127
+            },
+            {
+              "smile": 0.5634918808937073,
+              "eyebrow_raise": 0.02215978503227233,
+              "mouth_open": 0.0011667609214782715,
+              "facial_score": 23.23947161436081,
+              "movement_amount": 0.001431822418242752,
+              "type": "static",
+              "movement_score": 47.72741394142507,
+              "total_score": 30.585854312480087,
+              "timestamp": 4.186749
+            },
+            {
+              "smile": 0.5229145288467407,
+              "eyebrow_raise": 0.015355914831161489,
+              "mouth_open": 0.00016361474990844727,
+              "facial_score": 21.382167041301727,
+              "movement_amount": 0.005694072760118138,
+              "type": "moderate",
+              "movement_score": 100,
+              "total_score": 44.96751692891121,
+              "timestamp": 4.310722
+            }
+          ],
+          "gesture": [
+            {
+              "timestamp": 1.204224,
+              "movement": 0,
+              "quality": 22.67822580929192,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 1.504744,
+              "movement": 0.02335035886078764,
+              "quality": 57.22003544585134,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 1.66417,
+              "movement": 0.047854380574961004,
+              "quality": 92.09772775014386,
+              "is_gesture": true
+            },
+            {
+              "timestamp": 1.803697,
+              "movement": 0.02359451585329666,
+              "quality": 56.63666237500127,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 1.942469,
+              "movement": 0.03639476193482176,
+              "quality": 76.95394017178201,
+              "is_gesture": true
+            },
+            {
+              "timestamp": 2.079225,
+              "movement": 0.012531475248198832,
+              "quality": 41.572017277788916,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 2.217989,
+              "movement": 0.009831022159727327,
+              "quality": 37.73447841073252,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 2.35783,
+              "movement": 0.020068618654109114,
+              "quality": 53.767309985972005,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 2.494748,
+              "movement": 0.014053076062340486,
+              "quality": 45.07798280213392,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 2.631768,
+              "movement": 0.027575394241011294,
+              "quality": 66.34762929407442,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 2.768825,
+              "movement": 0.022463270477144942,
+              "quality": 57.72159890737383,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 2.905714,
+              "movement": 0.008141918067220566,
+              "quality": 36.629883030762684,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 3.042296,
+              "movement": 0.019022789070610658,
+              "quality": 51.94977485825159,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 3.179776,
+              "movement": 0.020969074922257806,
+              "quality": 54.17388528236599,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 3.316198,
+              "movement": 0.005005943609798842,
+              "quality": 30.389806789150306,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 3.453127,
+              "movement": 0.02228029794499228,
+              "quality": 55.78715875025733,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 3.596421,
+              "movement": 0.02818747461942952,
+              "quality": 65.75622507599579,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 3.765872,
+              "movement": 0.02066939943331173,
+              "quality": 55.43987029120713,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 3.908555,
+              "movement": 0.01849163745751237,
+              "quality": 53.07197596261717,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 4.048127,
+              "movement": 0.0119260703231891,
+              "quality": 42.61513923387025,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 4.186749,
+              "movement": 0.02150336916253854,
+              "quality": 56.50399578258258,
+              "is_gesture": false
+            },
+            {
+              "timestamp": 4.310722,
+              "movement": 0.02661195005490108,
+              "quality": 64.0141662473539,
+              "is_gesture": false
+            }
+          ],
+          "gaze": [
+            {
+              "timestamp": 1.204224,
+              "direction": "forward",
+              "is_forward": false
+            },
+            {
+              "timestamp": 1.504744,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 1.66417,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 1.803697,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 1.942469,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 2.079225,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 2.217989,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 2.35783,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 2.494748,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 2.631768,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 2.768825,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 2.905714,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 3.042296,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 3.179776,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 3.316198,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 3.453127,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 3.596421,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 3.765872,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 3.908555,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 4.048127,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 4.186749,
+              "direction": "forward",
+              "is_forward": true
+            },
+            {
+              "timestamp": 4.310722,
+              "direction": "forward",
+              "is_forward": true
+            }
+          ],
+          "facial": [
+            {
+              "timestamp": 1.204224,
+              "smile": 0.5998812615871429,
+              "eyebrow_raise": 0.04856985807418822
+            },
+            {
+              "timestamp": 1.504744,
+              "smile": 0.5784034729003906,
+              "eyebrow_raise": 0.045683875679969774
+            },
+            {
+              "timestamp": 1.66417,
+              "smile": 0.5692474544048309,
+              "eyebrow_raise": 0.019955158233642568
+            },
+            {
+              "timestamp": 1.803697,
+              "smile": 0.5902841687202454,
+              "eyebrow_raise": 0.023001328110694875
+            },
+            {
+              "timestamp": 1.942469,
+              "smile": 0.5227759480476379,
+              "eyebrow_raise": 0.043221831321716295
+            },
+            {
+              "timestamp": 2.079225,
+              "smile": 0.5079522728919983,
+              "eyebrow_raise": 0.039449229836463914
+            },
+            {
+              "timestamp": 2.217989,
+              "smile": 0.5377903580665588,
+              "eyebrow_raise": 0.023192808032035817
+            },
+            {
+              "timestamp": 2.35783,
+              "smile": 0.5652830004692078,
+              "eyebrow_raise": 0.012814894318580617
+            },
+            {
+              "timestamp": 2.494748,
+              "smile": 0.596579909324646,
+              "eyebrow_raise": 0.01717422902584075
+            },
+            {
+              "timestamp": 2.631768,
+              "smile": 0.5610108375549316,
+              "eyebrow_raise": 0.01445886492729186
+            },
+            {
+              "timestamp": 2.768825,
+              "smile": 0.5197241902351379,
+              "eyebrow_raise": 0.010404258966445912
+            },
+            {
+              "timestamp": 2.905714,
+              "smile": 0.5669787526130676,
+              "eyebrow_raise": 0.02106231451034545
+            },
+            {
+              "timestamp": 3.042296,
+              "smile": 0.5582213401794434,
+              "eyebrow_raise": 0.024675101041793813
+            },
+            {
+              "timestamp": 3.179776,
+              "smile": 0.5653023719787598,
+              "eyebrow_raise": 0.011984527111053456
+            },
+            {
+              "timestamp": 3.316198,
+              "smile": 0.5711078643798828,
+              "eyebrow_raise": 0.009591028094291677
+            },
+            {
+              "timestamp": 3.453127,
+              "smile": 0.5644947290420532,
+              "eyebrow_raise": 0.009119033813476552
+            },
+            {
+              "timestamp": 3.596421,
+              "smile": 0.5941987037658691,
+              "eyebrow_raise": 0.006906583905220021
+            },
+            {
+              "timestamp": 3.765872,
+              "smile": 0.5722776055335999,
+              "eyebrow_raise": 0.02599012851715087
+            },
+            {
+              "timestamp": 3.908555,
+              "smile": 0.5642428994178772,
+              "eyebrow_raise": 0.01714293658733367
+            },
+            {
+              "timestamp": 4.048127,
+              "smile": 0.5689918994903564,
+              "eyebrow_raise": 0.012712076306343068
+            },
+            {
+              "timestamp": 4.186749,
+              "smile": 0.5634918808937073,
+              "eyebrow_raise": 0.02215978503227233
+            },
+            {
+              "timestamp": 4.310722,
+              "smile": 0.5229145288467407,
+              "eyebrow_raise": 0.015355914831161489
+            }
+          ]
+        },
+        "recommendations": [
+          "\ud83d\udd34 CRITICAL: Low facial engagement (70% of your score!)",
+          "\ud83e\udd28 BE MORE EXPRESSIVE: Raise eyebrows when emphasizing points. Show enthusiasm with your face.",
+          "\ud83d\udca1 Key: Your FACIAL EXPRESSIONS are 70% of engagement. Body movement is only 30%."
+        ]
+      },
+      "debug_file": "../storage/debug/session_1762664331215_debug.json"
+    },
+    "video_path": "/Users/samebaugh/shark-vision/backend/storage/session_1762664331215.mp4"
+  },
+  "coaching": "**Strengths:**\n\n1.  Your eye contact proxy of 95/100 meets the professional standard of maintaining forward-facing gaze 85-95% of the time (Overcoming Public Speaking Anxiety through Nonverbal Communication).\n2. You show some smile activity, with a smile frequency of 0 per minute.\n\n**Areas to Improve:**\n\n1. Your posture score (0/100) is significantly below the professional benchmark of 75-85% for maintaining good posture, potentially reducing perceived credibility (Toastmasters International - Using Body Language Guide).\n2. Your gesture frequency (12.1/min) exceeds the recommended range of 3-8/min, which can make you appear frantic (GestureLens: Visual Analysis of Gestures in Presentation Videos).\n3.  Your gesture quality score (23/100) indicates an over-reliance on one-handed or asymmetric gestures. Aim for a symmetric gesture ratio above 60% to increase audience engagement (GestureLens Research Paper - Spatial and Temporal Distribution Analysis).\n\n**Evidence-Based Technique:**\n\nFocus on the \"Gesture Box\" technique. Keep gestures within a defined space between your shoulders and waist, extending no further than elbow width from your body. This creates natural, controlled movement that reinforces your message without distraction (How to Improve Non-Verbal Communication Skills: Master the 5 Core Elements).\n"
+}

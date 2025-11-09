@@ -125,7 +125,7 @@ export default function PythonAnalysisPage() {
       wsClient.setVideoElement(videoRef.current)
       
       // Start streaming frames
-      wsClient.startStreaming(10) // 10 FPS
+      await wsClient.startStreaming(10) // 10 FPS
       
       console.log('🎥 Recording started with Python backend')
     } catch (err) {

@@ -1,0 +1,47 @@
+{
+  "session_id": "session_1762666941395",
+  "analysis": {
+    "session_id": "session_1762666941395",
+    "session_meta": {
+      "duration_seconds": 0.490818,
+      "total_frames": 1,
+      "fps": 2.037415090726094,
+      "landmarks_per_frame": 543,
+      "total_landmarks_processed": 543
+    },
+    "aggregates": {},
+    "timeline": [],
+    "debug": {
+      "metrics_count": 0,
+      "events_count": 0,
+      "detailed_report": {
+        "session_id": "session_1762666941395",
+        "total_frames": 0,
+        "engagement_analysis": {
+          "error": "No engagement data recorded"
+        },
+        "problem_periods": [],
+        "score_factors": {
+          "engagement": {
+            "error": "No engagement data"
+          },
+          "posture": {
+            "error": "No posture data"
+          }
+        },
+        "scoring_breakdown": {
+          "posture": [],
+          "engagement": [],
+          "gesture": [],
+          "gaze": [],
+          "facial": []
+        },
+        "recommendations": []
+      },
+      "debug_file": "../storage/debug/session_1762666941395_debug.json"
+    },
+    "video_path": "/Users/samebaugh/shark-vision/backend/storage/session_1762666941395.mp4"
+  },
+  "coaching": "**Strengths:**\n1. Based on the provided single-frame analysis (0s duration), no discernible positive body language behaviors or strengths could be identified from the data.\n\n**Areas to Improve:**\n1.  **Posture:** The score of 0/100 indicates a significant lack of ideal posture. An open, upright stance is crucial for conveying confidence and authority (Gallo, 2014).\n2.  **Eye Contact:** With 0/100, there was no audience connection. Effective presenters engage in eye contact 60-70% of the time to build rapport and demonstrate credibility (Pease & Pease, 2004).\n3.  **Engagement & Gestures:** All scores (Engagement 0/100, Gesture Quality 0/100, Frequency 0.0/min, Smile 0.0/min) suggest a complete absence of dynamic communication, which is vital for audience connection (Harvard Business Review, 2018).\n\n**Evidence-Based Technique:**\nPractice a \"power pose\" for two minutes before presenting to boost confidence and reduce stress, thereby improving initial posture and presence (Cuddy et al., 2012). Focus on naturally smiling and making deliberate eye contact with different audience members from the outset.",
+  "slide_analysis": null
+}
