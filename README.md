@@ -132,7 +132,7 @@ Duration: 2:15  |  Frames: 45  |  Issues: 3  |  Avg Score: 7.2/10```bash
 
 ``````
 
-GEMINI_API_KEY=AIzaSyAFsUoxbPRSHlcgQT3Q4sp6R7A-X_VjlEM
+
 
 ## 🛠️ Tech Stack```
 
