@@ -9,17 +9,53 @@ import { useEffect, useRef, useState } from 'react'
 import { AnalysisWebSocketClient, RealtimeUpdate, FinalAnalysis, AnalysisMetrics } from '@/lib/websocket_client'
 import { AudioClient } from '@/lib/audio_client'
 import { useRouter } from 'next/navigation'
+import { VRModeButton } from './components/VRModeButton'
 
 export default function PythonAnalysisPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const router = useRouter()
   
-  const [wsClient] = useState(() => new AnalysisWebSocketClient('ws://localhost:8000/ws/analyze'))
-  const [audioClient] = useState(() => new AudioClient('http://localhost:8000'))
+  // State to track if we're on ngrok (set after mount to avoid hydration mismatch)
+  const [backendConfig, setBackendConfig] = useState({
+    host: 'localhost:8000',
+    wsProtocol: 'ws://',
+    httpProtocol: 'http://'
+  })
+  
+  // Initialize clients after mount (to avoid server/client mismatch)
+  const [wsClient, setWsClient] = useState<AnalysisWebSocketClient | null>(null)
+  const [audioClient, setAudioClient] = useState<AudioClient | null>(null)
+  
+  // Detect ngrok and set backend config + initialize clients after component mounts
+  useEffect(() => {
+    const isNgrok = window.location.hostname.includes('ngrok')
+    
+    if (isNgrok) {
+      const config = {
+        host: 'shark-backend.ngrok.io',
+        wsProtocol: 'wss://',
+        httpProtocol: 'https://'
+      }
+      setBackendConfig(config)
+      console.log('🔧 Using ngrok backend: https://shark-backend.ngrok.io')
+      
+      // Initialize clients with ngrok URLs
+      setWsClient(new AnalysisWebSocketClient(`${config.wsProtocol}${config.host}/ws/analyze`))
+      setAudioClient(new AudioClient(`${config.httpProtocol}${config.host}`))
+    } else {
+      console.log('🔧 Using local backend: http://localhost:8000')
+      
+      // Initialize clients with local URLs
+      const config = backendConfig
+      setWsClient(new AnalysisWebSocketClient(`${config.wsProtocol}${config.host}/ws/analyze`))
+      setAudioClient(new AudioClient(`${config.httpProtocol}${config.host}`))
+    }
+  }, [])
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [vrSession, setVrSession] = useState<XRSession | null>(null)
   
   // Real-time status (not scores)
   const [liveStatus, setLiveStatus] = useState<any>(null)
@@ -31,6 +67,8 @@ export default function PythonAnalysisPage() {
 
   // Setup WebSocket callbacks
   useEffect(() => {
+    if (!wsClient) return
+    
     wsClient.onConnect = () => {
       setIsConnected(true)
       setError(null)
@@ -79,27 +117,122 @@ export default function PythonAnalysisPage() {
   const startWebcam = async () => {
     try {
       setError(null)
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: 'user'
-        },
-        audio: false
-      })
+      console.log('🎥 Requesting camera access...')
+      
+      // Check if mediaDevices is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera API not available. This page must be served over HTTPS to access the camera on Quest browser. Current URL: ' + window.location.href)
+      }
+      
+      let mediaStream: MediaStream | null = null
+      
+      // STRATEGY 1: Try environment camera first (Quest passthrough/front camera)
+      // This is most likely to give you the physical camera view
+      try {
+        console.log('🎯 Attempting environment-facing camera (Quest passthrough)...')
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { exact: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        })
+        console.log('✅ Got environment camera')
+      } catch (envError) {
+        console.warn('Environment camera not available:', envError)
+        
+        // STRATEGY 2: Try user-facing camera
+        try {
+          console.log('🎯 Attempting user-facing camera...')
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'user',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          })
+          console.log('✅ Got user-facing camera')
+        } catch (userError) {
+          console.warn('User-facing camera failed:', userError)
+          
+          // STRATEGY 3: List all devices and filter out avatar
+          const devices = await navigator.mediaDevices.enumerateDevices()
+          const videoDevices = devices.filter(device => device.kind === 'videoinput')
+          
+          console.log('📹 Available cameras:', videoDevices.map(d => ({
+            label: d.label,
+            id: d.deviceId.substring(0, 20) + '...'
+          })))
+          
+          // Find first non-avatar camera
+          const physicalCamera = videoDevices.find(device => {
+            const label = device.label.toLowerCase()
+            return !label.includes('avatar') && 
+                   !label.includes('virtual') &&
+                   !label.includes('meta avatar')
+          })
+          
+          if (physicalCamera) {
+            console.log('🎯 Found physical camera:', physicalCamera.label)
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                deviceId: { exact: physicalCamera.deviceId }
+              },
+              audio: false
+            })
+            console.log('✅ Got physical camera via deviceId')
+          } else {
+            // STRATEGY 4: Just try any camera without constraints
+            console.log('🎯 Attempting any available camera...')
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: false
+            })
+            console.log('✅ Got default camera')
+          }
+        }
+      }
 
-      if (videoRef.current) {
+      if (videoRef.current && mediaStream) {
         videoRef.current.srcObject = mediaStream
         setStream(mediaStream)
+        
+        // Log the actual track being used
+        const videoTrack = mediaStream.getVideoTracks()[0]
+        const settings = videoTrack.getSettings()
+        console.log('📹 Active camera:', videoTrack.label)
+        console.log('📹 Settings:', {
+          facingMode: settings.facingMode,
+          width: settings.width,
+          height: settings.height,
+          deviceId: settings.deviceId?.substring(0, 20) + '...'
+        })
+        
         try {
           await videoRef.current.play()
+          console.log('▶️ Video playing')
         } catch (playError) {
           console.warn('Video play was interrupted:', playError)
         }
       }
-    } catch (err) {
-      setError('Failed to access webcam. Please grant camera permissions.')
+    } catch (err: any) {
+      let errorMsg = ''
+      
+      if (err.message && err.message.includes('HTTPS')) {
+        errorMsg = '🔒 HTTPS Required: Quest Browser requires HTTPS to access camera. You need to:\n\n1. Set up HTTPS with a self-signed certificate, OR\n2. Use ngrok/cloudflare tunnel to get HTTPS, OR\n3. Use the VR Mode button instead (WebXR doesn\'t need camera access)'
+      } else if (err.name === 'NotAllowedError') {
+        errorMsg = '⚠️ Camera permission denied. Please allow camera access in browser settings and refresh.'
+      } else if (err.name === 'NotFoundError') {
+        errorMsg = '⚠️ No camera found. Make sure your device has a camera.'
+      } else {
+        errorMsg = `⚠️ Failed to access camera: ${err.message}`
+      }
+      
+      setError(errorMsg)
       console.error('Webcam error:', err)
+      alert(errorMsg)
     }
   }
 
@@ -111,6 +244,23 @@ export default function PythonAnalysisPage() {
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null
+    }
+  }
+
+  // VR Mode Handlers
+  const handleVRStart = (session: XRSession) => {
+    setVrSession(session)
+    console.log('🥽 VR session started')
+    // Note: In VR mode, the camera feed would come from the XR session
+    // This is a placeholder - full implementation would need XRWebGLLayer setup
+  }
+
+  const handleVREnd = () => {
+    setVrSession(null)
+    console.log('👋 VR session ended')
+    // Clean up any VR-specific resources
+    if (stream) {
+      stopWebcam()
     }
   }
 
@@ -127,6 +277,11 @@ export default function PythonAnalysisPage() {
       setFrameCount(0)
       setElapsedTime(0)
       setLiveStatus(null)
+
+      // Check if clients are initialized
+      if (!wsClient || !audioClient) {
+        throw new Error('Backend clients not initialized')
+      }
 
       // Connect to backend
       await wsClient.connect()
@@ -157,7 +312,7 @@ export default function PythonAnalysisPage() {
       
       console.log('🎥 Recording started with Python backend')
     } catch (err) {
-      setError('Failed to connect to Python backend. Is it running at http://localhost:8000?')
+      setError(`Failed to connect to Python backend. Is it running at ${backendConfig.httpProtocol}${backendConfig.host}?`)
       setIsRecording(false)
       console.error('Recording error:', err)
     }
@@ -167,6 +322,8 @@ export default function PythonAnalysisPage() {
   const stopRecording = async () => {
     console.log('🛑 Stopping recording...')
     setIsRecording(false)
+    
+    if (!wsClient || !audioClient) return
     
     // Get session ID before disconnecting
     const sessionId = wsClient.getCurrentSessionId()
@@ -206,7 +363,7 @@ export default function PythonAnalysisPage() {
       attempts++
       
       try {
-        const response = await fetch(`http://localhost:8000/api/sessions/${sessionId}`)
+        const response = await fetch(`${backendConfig.httpProtocol}${backendConfig.host}/api/sessions/${sessionId}`)
         
         if (response.ok) {
           // Analysis is ready!
@@ -247,10 +404,10 @@ export default function PythonAnalysisPage() {
   useEffect(() => {
     return () => {
       stopWebcam()
-      wsClient.disconnect()
-      audioClient.stopCapture().catch(err => console.error('Cleanup audio error:', err))
+      if (wsClient) wsClient.disconnect()
+      if (audioClient) audioClient.stopCapture().catch(err => console.error('Cleanup audio error:', err))
     }
-  }, [])
+  }, [wsClient, audioClient])
 
   return (
     <>
@@ -386,7 +543,7 @@ export default function PythonAnalysisPage() {
           borderRadius: '8px',
           color: '#856404'
         }}>
-          <strong>Note:</strong> Make sure Python backend is running at http://localhost:8000
+          <strong>Note:</strong> Make sure Python backend is running at {backendConfig.httpProtocol}{backendConfig.host}
           <br />
           Run: <code>cd backend && python main.py</code>
         </div>
@@ -458,7 +615,13 @@ export default function PythonAnalysisPage() {
           </div>
 
           {/* Controls */}
-          <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+          <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            {/* VR Mode Button */}
+            <VRModeButton 
+              onVRStart={handleVRStart}
+              onVREnd={handleVREnd}
+            />
+            
             {!stream ? (
               <button
                 onClick={startWebcam}
@@ -479,19 +642,21 @@ export default function PythonAnalysisPage() {
               <>
                 <button
                   onClick={startRecording}
+                  disabled={!wsClient || !audioClient}
                   style={{
                     padding: '1rem 2rem',
                     fontSize: '1rem',
-                    backgroundColor: '#28a745',
+                    backgroundColor: (!wsClient || !audioClient) ? '#6c757d' : '#28a745',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
-                    cursor: 'pointer',
+                    cursor: (!wsClient || !audioClient) ? 'not-allowed' : 'pointer',
                     fontWeight: 'bold',
-                    flex: 1
+                    flex: 1,
+                    opacity: (!wsClient || !audioClient) ? 0.6 : 1
                   }}
                 >
-                  🎬 Start Analysis
+                  {(!wsClient || !audioClient) ? '⏳ Initializing...' : '🎬 Start Analysis'}
                 </button>
                 <button
                   onClick={stopWebcam}

@@ -1,0 +1,14 @@
+version: "2"
+authtoken: 35F3VoKUEPfELtdGIslcK0Qe84h_3uFYK3t6W12tmZY3UcBmE
+
+tunnels:
+  frontend:
+    proto: http
+    addr: 3001
+    inspect: true
+  
+  backend:
+    proto: http
+    addr: 8000
+    inspect: true
+    subdomain: shark-backend
